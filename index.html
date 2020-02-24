@@ -1,85 +1,441 @@
-<HTML>
 
-<HEAD>
+<!DOCTYPE html>
+<html lang="en">
 
-<TITLE>Your Title Here</TITLE>
+<head>
 
-</HEAD>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-<BODY BGCOLOR="FFFFFF">
+    <title>WebReader - Custom Initialization Demo</title>
 
-<CENTER><IMG SRC="clouds.jpg" ALIGN="BOTTOM"> </CENTER>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.0/css/bootstrap.min.css"
+        integrity="sha384-PDle/QlgIONtM1aqA2Qemk5gPOE7wFq8+Em+G/hmo5Iq0CCmYZLv3fVRDJ4MMwEA" crossorigin="anonymous">
 
-<HR>
+    <!-- Custom fonts for this template -->
 
-<a href="http://somegreatsite.com">Link Name</a>
+    <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet'
+        type='text/css'>
+    <link
+        href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+        rel='stylesheet' type='text/css'>
 
-is a link to another nifty site
+    <!-- Custom styles for this template -->
+    <!-- <link href="css/clean-blog.min.css" rel="stylesheet"> -->
+    <style>
+        body {
+            font-size: 20px;
+            color: #212529;
+            font-family: 'Lora', 'Times New Roman', serif;
+        }
 
-<H1>This is a Header</H1>
+        p {
+            line-height: 1.5;
+            margin: 30px 0;
+        }
 
-<H2>This is a Medium Header</H2>
+        p a {
+            text-decoration: underline;
+        }
 
-Send me mail at <a href="mailto:support@yourcompany.com">
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-weight: 800;
+            font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
 
-support@yourcompany.com</a>.
+        a {
+            color: #212529;
+            transition: all 0.2s;
+        }
 
-<P> This is a new paragraph!
+        a:focus,
+        a:hover {
+            color: #0085A1;
+        }
 
-<P> <B>Drag and drop your files, or type, paste, and edit text here.
+        blockquote {
+            font-style: italic;
+            /* color: #868e96; */
+        }
 
-Natural Reader is a professional text to speech program that converts any written text into spoken words. The paid versions of Natural Reader have many more features.
+        .section-heading {
+            font-size: 36px;
+            font-weight: 700;
+            margin-top: 60px;
+        }
 
-If you are interested in using our voices for non-personal use such as for Youtube videos, e-Learning, or other commercial or public purposes, please check out our Natural Reader Commercial web application.</B>
+        .caption {
+            font-size: 14px;
+            font-style: italic;
+            display: block;
+            margin: 0;
+            padding: 10px;
+            text-align: center;
+            border-bottom-right-radius: 5px;
+            border-bottom-left-radius: 5px;
+        }
 
-<BR> <B><I>This is a new sentence without a paragraph break, in bold italics.</I></B>
+        ::-moz-selection {
+            color: #fff;
+            background: #0085A1;
+            text-shadow: none;
+        }
 
-<HR>
+        ::selection {
+            color: #fff;
+            background: #0085A1;
+            text-shadow: none;
+        }
 
-<script src="https://webreader.naturalreaders.com/nr-webreader.js" defer></script>
-<script>
-    window.addEventListener("DOMContentLoaded", function() {
-        if (typeof NRWebReader != 'undefined') {
-            window['NRWebReader'] = new NRWebReader({
-            widget_id: "wkfom74fgt",  // DO NOT REMOVE. This is your widget ID for your WebReader
-            icon: {
-            //    icon_name: "speaker", /*Optional: Alternative icon to show as the widget icon*/
-            //    icon_position: "bottom-left", /*Optional: Position for the the widget to show up at*/
-            //    icon_position_offsets: {/*Optional: Custom position offsets for the the widget to show up at*/
-            //        left:""
-            //        right:""
-            //        top:""
-            //        bottom:""
-            //    }
-            //    icon_color: "#0555B8", /*Optional: Color of the icon*/
-            //    icon_size: {width: "60px", height: "60px"}, /*Optional: icon size. Above 50px is recommended.*/
-            //    text_box: true, /*Optional: false if you don't want to have a greeting text box*/
-            //    text_box_greeting: "Listen", /*Optional: Your greeting text in the text box*/
-            //    text_box_background_color: "#ffffff", /*Optional: Background color of text box*/
-            //    text_box_font_color: "#0555B8", /*Optional: Color of the icon*/
-            //    text_box_font_size: "18px", /*Optional: Font size of the text in text box*/
-            //    show_in_mobile: true, /*Optional: false if you don't want the widget to show up on mobile*/
-            //    mob_icon_position: "bottom-left", /*Optional: Position for the the widget to show up at on mobile*/
-            //    mob_icon_position_offsets: {/*Optional: Custom position offsets for the the widget to show up at on mobile*/
-            //        left:""
-            //        right:""
-            //        top:""
-            //        bottom:""
-            //    }
-            //    mob_icon_size: {width: "30px", height: "30px"}, /*Optional: icon size on mobile. Above 30px is recommended.*/
-            //    mob_text_box: false /*Optional: false if you don't want to have a greeting text box on mobile*/
-            },
-            bar : {
-            //    settings_default_voice: "Matthew *", /*Optional: Default voice for TTS*/
-            //    settings_default_speed: 1, /*Optional: Default speed for TTS*/
-            //    settings_highlight_colour_scheme: "dark" /*Optional: Default color scheme for highlighting text being read on page*/
-            },
-            //custom_text_source: "" /*Optional: only read the text inside the HTML element with the id or class */
+        img::-moz-selection {
+            color: #fff;
+            background: transparent;
+        }
+
+        img::selection {
+            color: #fff;
+            background: transparent;
+        }
+
+        img::-moz-selection {
+            color: #fff;
+            background: transparent;
+        }
+
+        #mainNav {
+            position: absolute;
+            border-bottom: 1px solid #e9ecef;
+            background-color: white;
+            font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        #mainNav .navbar-brand {
+            font-weight: 800;
+            color: #343a40;
+        }
+
+        #mainNav .navbar-toggler {
+            font-size: 12px;
+            font-weight: 800;
+            padding: 13px;
+            text-transform: uppercase;
+            color: #343a40;
+        }
+
+        #mainNav .navbar-nav>li.nav-item>a {
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        @media only screen and (min-width: 992px) {
+            #mainNav {
+                border-bottom: 1px solid transparent;
+                background: transparent;
+            }
+
+            #mainNav .navbar-brand {
+                padding: 10px 20px;
+                color: #fff;
+            }
+
+            #mainNav .navbar-brand:focus,
+            #mainNav .navbar-brand:hover {
+                color: rgba(255, 255, 255, 0.8);
+            }
+
+            #mainNav .navbar-nav>li.nav-item>a {
+                padding: 10px 20px;
+                color: #fff;
+            }
+
+            #mainNav .navbar-nav>li.nav-item>a:focus,
+            #mainNav .navbar-nav>li.nav-item>a:hover {
+                color: rgba(255, 255, 255, 0.8);
+            }
+        }
+
+        @media only screen and (min-width: 992px) {
+            #mainNav {
+                transition: background-color 0.2s;
+                /* Force Hardware Acceleration in WebKit */
+                transform: translate3d(0, 0, 0);
+                -webkit-backface-visibility: hidden;
+            }
+
+            #mainNav.is-fixed {
+                /* when the user scrolls down, we hide the header right above the viewport */
+                position: fixed;
+                top: -67px;
+                transition: transform 0.2s;
+                border-bottom: 1px solid white;
+                background-color: rgba(255, 255, 255, 0.9);
+            }
+
+            #mainNav.is-fixed .navbar-brand {
+                color: #212529;
+            }
+
+            #mainNav.is-fixed .navbar-brand:focus,
+            #mainNav.is-fixed .navbar-brand:hover {
+                color: #0085A1;
+            }
+
+            #mainNav.is-fixed .navbar-nav>li.nav-item>a {
+                color: #212529;
+            }
+
+            #mainNav.is-fixed .navbar-nav>li.nav-item>a:focus,
+            #mainNav.is-fixed .navbar-nav>li.nav-item>a:hover {
+                color: #0085A1;
+            }
+
+            #mainNav.is-visible {
+                /* if the user changes the scrolling direction, we show the header */
+                transform: translate3d(0, 100%, 0);
+            }
+        }
+
+        header.masthead {
+            margin-bottom: 50px;
+            background: no-repeat center center;
+            background-color: #868e96;
+            background-attachment: scroll;
+            position: relative;
+            background-size: cover;
+        }
+
+        header.masthead .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background-color: #212529;
+            opacity: 0.5;
+        }
+
+        header.masthead .page-heading,
+        header.masthead .post-heading,
+        header.masthead .site-heading {
+            padding: 200px 0 150px;
+            color: white;
+        }
+
+        @media only screen and (min-width: 768px) {
+
+            header.masthead .page-heading,
+            header.masthead .post-heading,
+            header.masthead .site-heading {
+                padding: 200px 0;
+            }
+        }
+
+        header.masthead .page-heading,
+        header.masthead .site-heading {
+            text-align: center;
+        }
+
+        header.masthead .page-heading h1,
+        header.masthead .site-heading h1 {
+            font-size: 50px;
+            margin-top: 0;
+        }
+
+        header.masthead .page-heading .subheading,
+        header.masthead .site-heading .subheading {
+            font-size: 24px;
+            font-weight: 300;
+            line-height: 1.1;
+            display: block;
+            margin: 10px 0 0;
+            font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        @media only screen and (min-width: 768px) {
+
+            header.masthead .page-heading h1,
+            header.masthead .site-heading h1 {
+                font-size: 80px;
+            }
+        }
+
+        header.masthead .post-heading h1 {
+            font-size: 35px;
+        }
+
+        header.masthead .post-heading .meta,
+        header.masthead .post-heading .subheading {
+            line-height: 1.1;
+            display: block;
+        }
+
+        header.masthead .post-heading .subheading {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 10px 0 30px;
+            font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        header.masthead .post-heading .meta {
+            font-size: 20px;
+            font-weight: 300;
+            font-style: italic;
+            font-family: 'Lora', 'Times New Roman', serif;
+        }
+
+        header.masthead .post-heading .meta a {
+            color: #fff;
+        }
+
+        @media only screen and (min-width: 768px) {
+            header.masthead .post-heading h1 {
+                font-size: 55px;
+            }
+
+            header.masthead .post-heading .subheading {
+                font-size: 30px;
+            }
+        }
+
+        .post-preview>a {
+            color: #212529;
+        }
+
+        .post-preview>a:focus,
+        .post-preview>a:hover {
+            text-decoration: none;
+            color: #0085A1;
+        }
+
+        .post-preview>a>.post-title {
+            font-size: 30px;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+
+        .post-preview>a>.post-subtitle {
+            font-weight: 300;
+            margin: 0 0 10px;
+        }
+
+        .post-preview>.post-meta {
+            font-size: 18px;
+            font-style: italic;
+            margin-top: 0;
+            color: #868e96;
+        }
+
+        .post-preview>.post-meta>a {
+            text-decoration: none;
+            color: #212529;
+        }
+
+        .post-preview>.post-meta>a:focus,
+        .post-preview>.post-meta>a:hover {
+            text-decoration: underline;
+            color: #0085A1;
+        }
+
+        @media only screen and (min-width: 768px) {
+            .post-preview>a>.post-title {
+                font-size: 36px;
+            }
+        }
+
+        .trigger-info{
+            color:#ebdcb2;
+            font-size: 16px;
+            font-weight: normal;
+            margin:3px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand">Custom Initialization Demo</a>
+            <span class="nr-trigger-placeholder"></span>
+            <span class="trigger-info">← This is NR Trigger</span>
+            <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+                data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+                aria-label="Toggle navigation">
+                Menu
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../widget.html">Home</a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <header class="masthead" style="background-color: #0555b5">
+        <div class="overlay"></div>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-md-10 mx-auto">
+                    <div class="post-heading">
+                        <h1>Man must explore, and this is exploration at its greatest
+                            <!-- Custom Initialization example with an image -->
+                            <img class="nr-custom-trigger"
+                                src="https://webreader.naturalreaders.com/webreader-icons/tts.svg"
+                                width="40px" height="40px" style="display: inline-block;border-radius: 50%;"></img>
+                                <span class="trigger-info">← This is a custom trigger</span>
+                            </h1>
+                        <h2 class="subheading">Problems look mighty small from 150 miles up</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://webreader.naturalreaders.com/nr-webreader.js" type="text/javascript" defer></script>
+    <script type="text/javascript">
+        var id = getId();
+        if (id != null) {
+            window.addEventListener('DOMContentLoaded', function() {
+                window['NRWebReader'] = new NRWebReader({
+                    widget_id: id,  // DO NOT REMOVE. This is your widget ID for your WebReader
+                });
             });
         }
-    }); 
-</script> 
 
-</BODY>
+        function getId() {
+            var url = document.URL;
+            console.log(url);
 
-</HTML>
+            var params = url.split('id=');
+            if (params.length > 1) {
+                console.log(params[1]);
+                return params[1];
+            }
+            return null;
+        }
+    </script>
+
+
+
+</body>
+
+</html>
