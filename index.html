@@ -1,409 +1,47 @@
+<HTML>
 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>WebReader - Custom Initialization Demo</title>
-
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.0/css/bootstrap.min.css"
-        integrity="sha384-PDle/QlgIONtM1aqA2Qemk5gPOE7wFq8+Em+G/hmo5Iq0CCmYZLv3fVRDJ4MMwEA" crossorigin="anonymous">
-
-    <!-- Custom fonts for this template -->
-
-    <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet'
-        type='text/css'>
-    <link
-        href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
-        rel='stylesheet' type='text/css'>
-
-    <!-- Custom styles for this template -->
-    <!-- <link href="css/clean-blog.min.css" rel="stylesheet"> -->
-    <style>
-        body {
-            font-size: 20px;
-            color: #212529;
-            font-family: 'Lora', 'Times New Roman', serif;
-        }
-
-        p {
-            line-height: 1.5;
-            margin: 30px 0;
-        }
-
-        p a {
-            text-decoration: underline;
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            font-weight: 800;
-            font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        }
-
-        a {
-            color: #212529;
-            transition: all 0.2s;
-        }
-
-        a:focus,
-        a:hover {
-            color: #0085A1;
-        }
-
-        blockquote {
-            font-style: italic;
-            /* color: #868e96; */
-        }
-
-        .section-heading {
-            font-size: 36px;
-            font-weight: 700;
-            margin-top: 60px;
-        }
-
-        .caption {
-            font-size: 14px;
-            font-style: italic;
-            display: block;
-            margin: 0;
-            padding: 10px;
-            text-align: center;
-            border-bottom-right-radius: 5px;
-            border-bottom-left-radius: 5px;
-        }
-
-        ::-moz-selection {
-            color: #fff;
-            background: #0085A1;
-            text-shadow: none;
-        }
-
-        ::selection {
-            color: #fff;
-            background: #0085A1;
-            text-shadow: none;
-        }
-
-        img::-moz-selection {
-            color: #fff;
-            background: transparent;
-        }
-
-        img::selection {
-            color: #fff;
-            background: transparent;
-        }
-
-        img::-moz-selection {
-            color: #fff;
-            background: transparent;
-        }
-
-        #mainNav {
-            position: absolute;
-            border-bottom: 1px solid #e9ecef;
-            background-color: white;
-            font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        }
-
-        #mainNav .navbar-brand {
-            font-weight: 800;
-            color: #343a40;
-        }
-
-        #mainNav .navbar-toggler {
-            font-size: 12px;
-            font-weight: 800;
-            padding: 13px;
-            text-transform: uppercase;
-            color: #343a40;
-        }
-
-        #mainNav .navbar-nav>li.nav-item>a {
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        @media only screen and (min-width: 992px) {
-            #mainNav {
-                border-bottom: 1px solid transparent;
-                background: transparent;
-            }
-
-            #mainNav .navbar-brand {
-                padding: 10px 20px;
-                color: #fff;
-            }
-
-            #mainNav .navbar-brand:focus,
-            #mainNav .navbar-brand:hover {
-                color: rgba(255, 255, 255, 0.8);
-            }
-
-            #mainNav .navbar-nav>li.nav-item>a {
-                padding: 10px 20px;
-                color: #fff;
-            }
-
-            #mainNav .navbar-nav>li.nav-item>a:focus,
-            #mainNav .navbar-nav>li.nav-item>a:hover {
-                color: rgba(255, 255, 255, 0.8);
-            }
-        }
-
-        @media only screen and (min-width: 992px) {
-            #mainNav {
-                transition: background-color 0.2s;
-                /* Force Hardware Acceleration in WebKit */
-                transform: translate3d(0, 0, 0);
-                -webkit-backface-visibility: hidden;
-            }
-
-            #mainNav.is-fixed {
-                /* when the user scrolls down, we hide the header right above the viewport */
-                position: fixed;
-                top: -67px;
-                transition: transform 0.2s;
-                border-bottom: 1px solid white;
-                background-color: rgba(255, 255, 255, 0.9);
-            }
-
-            #mainNav.is-fixed .navbar-brand {
-                color: #212529;
-            }
-
-            #mainNav.is-fixed .navbar-brand:focus,
-            #mainNav.is-fixed .navbar-brand:hover {
-                color: #0085A1;
-            }
-
-            #mainNav.is-fixed .navbar-nav>li.nav-item>a {
-                color: #212529;
-            }
-
-            #mainNav.is-fixed .navbar-nav>li.nav-item>a:focus,
-            #mainNav.is-fixed .navbar-nav>li.nav-item>a:hover {
-                color: #0085A1;
-            }
-
-            #mainNav.is-visible {
-                /* if the user changes the scrolling direction, we show the header */
-                transform: translate3d(0, 100%, 0);
-            }
-        }
-
-        header.masthead {
-            margin-bottom: 50px;
-            background: no-repeat center center;
-            background-color: #868e96;
-            background-attachment: scroll;
-            position: relative;
-            background-size: cover;
-        }
-
-        header.masthead .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 100%;
-            background-color: #212529;
-            opacity: 0.5;
-        }
-
-        header.masthead .page-heading,
-        header.masthead .post-heading,
-        header.masthead .site-heading {
-            padding: 200px 0 150px;
-            color: white;
-        }
-
-        @media only screen and (min-width: 768px) {
-
-            header.masthead .page-heading,
-            header.masthead .post-heading,
-            header.masthead .site-heading {
-                padding: 200px 0;
-            }
-        }
-
-        header.masthead .page-heading,
-        header.masthead .site-heading {
-            text-align: center;
-        }
-
-        header.masthead .page-heading h1,
-        header.masthead .site-heading h1 {
-            font-size: 50px;
-            margin-top: 0;
-        }
-
-        header.masthead .page-heading .subheading,
-        header.masthead .site-heading .subheading {
-            font-size: 24px;
-            font-weight: 300;
-            line-height: 1.1;
-            display: block;
-            margin: 10px 0 0;
-            font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        }
-
-        @media only screen and (min-width: 768px) {
-
-            header.masthead .page-heading h1,
-            header.masthead .site-heading h1 {
-                font-size: 80px;
-            }
-        }
-
-        header.masthead .post-heading h1 {
-            font-size: 35px;
-        }
-
-        header.masthead .post-heading .meta,
-        header.masthead .post-heading .subheading {
-            line-height: 1.1;
-            display: block;
-        }
-
-        header.masthead .post-heading .subheading {
-            font-size: 24px;
-            font-weight: 600;
-            margin: 10px 0 30px;
-            font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        }
-
-        header.masthead .post-heading .meta {
-            font-size: 20px;
-            font-weight: 300;
-            font-style: italic;
-            font-family: 'Lora', 'Times New Roman', serif;
-        }
-
-        header.masthead .post-heading .meta a {
-            color: #fff;
-        }
-
-        @media only screen and (min-width: 768px) {
-            header.masthead .post-heading h1 {
-                font-size: 55px;
-            }
-
-            header.masthead .post-heading .subheading {
-                font-size: 30px;
-            }
-        }
-
-        .post-preview>a {
-            color: #212529;
-        }
-
-        .post-preview>a:focus,
-        .post-preview>a:hover {
-            text-decoration: none;
-            color: #0085A1;
-        }
-
-        .post-preview>a>.post-title {
-            font-size: 30px;
-            margin-top: 30px;
-            margin-bottom: 10px;
-        }
-
-        .post-preview>a>.post-subtitle {
-            font-weight: 300;
-            margin: 0 0 10px;
-        }
-
-        .post-preview>.post-meta {
-            font-size: 18px;
-            font-style: italic;
-            margin-top: 0;
-            color: #868e96;
-        }
-
-        .post-preview>.post-meta>a {
-            text-decoration: none;
-            color: #212529;
-        }
-
-        .post-preview>.post-meta>a:focus,
-        .post-preview>.post-meta>a:hover {
-            text-decoration: underline;
-            color: #0085A1;
-        }
-
-        @media only screen and (min-width: 768px) {
-            .post-preview>a>.post-title {
-                font-size: 36px;
-            }
-        }
-
-        .trigger-info{
-            color:#ebdcb2;
-            font-size: 16px;
-            font-weight: normal;
-            margin:3px;
-        }
-    </style>
-
-</head>
-
-<body>
-
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
-        <div class="container">
-            <a class="navbar-brand">Custom Initialization Demo</a>
-            <span class="nr-trigger-placeholder"></span>
-            <span class="trigger-info">← This is NR Trigger</span>
-            <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
-                data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
-                aria-label="Toggle navigation">
-                Menu
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarResponsive">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="../../widget.html">Home</a>
-                    </li>
-
-                </ul>
-            </div>
-        </div>
-    </nav>
-    <header class="masthead" style="background-color: #0555b5">
-        <div class="overlay"></div>
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8 col-md-10 mx-auto">
-                    <div class="post-heading">
-                        <h1>Man must explore, and this is exploration at its greatest
-                            <!-- Custom Initialization example with an image -->
-                            <img class="nr-custom-trigger"
-                                src="https://webreader.naturalreaders.com/webreader-icons/tts.svg"
-                                width="40px" height="40px" style="display: inline-block;border-radius: 50%;"></img>
-                                <span class="trigger-info">← This is a custom trigger</span>
-                            </h1>
-                        <h2 class="subheading">Problems look mighty small from 150 miles up</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
+<HEAD>
+
+<TITLE>Your Title Here</TITLE>
+
+</HEAD>
+
+<BODY BGCOLOR="FFFFFF">
+
+<CENTER><IMG SRC="clouds.jpg" ALIGN="BOTTOM"> </CENTER>
+
+<HR>
+
+<a href="http://somegreatsite.com">Link Name</a>
+
+is a link to another nifty site
+
+<H1>This is a Header</H1>
+
+<H2>This is a Medium Header</H2>
+
+Send me mail at <a href="mailto:support@yourcompany.com">
+
+support@yourcompany.com</a>.
+
+<P> This is a new paragraph!
+
+<P> <B>Drag and drop your files, or type, paste, and edit text here.
+
+Natural Reader is a professional text to speech program that converts any written text into spoken words. The paid versions of Natural Reader have many more features.
+
+If you are interested in using our voices for non-personal use such as for Youtube videos, e-Learning, or other commercial or public purposes, please check out our Natural Reader Commercial web application.</B>
+
+<BR> <B><I>En todas partes del mundo hay gente con espíritu emprendedor y además con mucha creatividad, pero que lamentablemente en muchos casos cuando pusieron su negocio en marcha, fracasaron. Es decir, no tuvieron éxito con su empresa.
+
+La razón principal es que no entendieron, desde el principio, conceptos tan fundamentales como rentabilidad o margen de utilidad, o bien en cuánto tiempo su negocio comenzaría a generar beneficios.
+
+Es decir, no hicieron un plan de negocios, no describieron en un documento de manera ordenada, la manera cómo funciona un negocio. No pensaron en el objetivo del negocio, el mercado potencial, la competencia, sus valores agregados y los productos o servicios de su empresa.
+
+Un plan empresarial también es un documento de venta, diseñado para convencer a prestamistas por apoyo externo para sustentarlos o para convencer a otros de que tu plan vale la pena. Un buen plan empresarial te puede ayudar a hacerlo.
+Escribir tus pensamientos en papel, y formar un plan, clarifica tu propio pensamiento</I></B>
+
+<HR>
 
 <script src="https://webreader.naturalreaders.com/nr-webreader.js" defer></script>
 <script>
@@ -416,8 +54,6 @@
     }); 
 </script>
 
+</BODY>
 
-
-</body>
-
-</html>
+</HTML>
