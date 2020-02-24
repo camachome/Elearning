@@ -405,34 +405,16 @@
         </div>
     </header>
 
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-        crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
-
-    <script src="https://webreader.naturalreaders.com/nr-webreader.js" type="text/javascript" defer></script>
-    <script type="text/javascript">
-        var id = getId();
-        if (id != null) {
-            window.addEventListener('DOMContentLoaded', function() {
-                window['NRWebReader'] = new NRWebReader({
-                    widget_id: id,  // DO NOT REMOVE. This is your widget ID for your WebReader
-                });
+<script src="https://webreader.naturalreaders.com/nr-webreader.js" defer></script>
+<script>
+    window.addEventListener("DOMContentLoaded", function() {
+        if (typeof NRWebReader != 'undefined') {
+            window['NRWebReader'] = new NRWebReader({
+            widget_id: "erzgqsea9s"  // DO NOT REMOVE. This is your widget ID for your WebReader
             });
         }
-
-        function getId() {
-            var url = document.URL;
-            console.log(url);
-
-            var params = url.split('id=');
-            if (params.length > 1) {
-                console.log(params[1]);
-                return params[1];
-            }
-            return null;
-        }
-    </script>
+    }); 
+</script>
 
 
 
