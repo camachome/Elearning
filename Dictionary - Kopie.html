@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diccionario RAE</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 70%; //600px;
+      margin: 20px auto;
+      padding: 20px;
+      text-align: center;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+	width: 70%
+    }
+    input, button {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 15px;
+      font-size: 25px;
+    }
+    #wordInput {
+      flex: 1;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #definitionOutput {
+      text-align: left;
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #eee;
+      border-radius: 15px;
+      background: #f9f9f9;
+      font-size: 25px;
+    }
+    #speakerIcon {
+      cursor: pointer;
+      font-size: 20px;
+      color: #007bff;
+      display: none; /* Hidden until Spanish voice is confirmed */
+    }
+    .loading { color: #007bff; }
+    .error { color: red; }
+    .definition-item { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Diccionario RAE</h1>
+  <div class="input-group">
+    <input type="text" id="wordInput" placeholder="Ej: 'banco', 'estar'" onkeydown="handleKeyPress(event)">
+    <span id="speakerIcon" title="Pronunciar en español" onclick="pronounceWord()">🔊</span>
+    <button onclick="fetchRAEDefinition()">Buscar</button>
+  </div>
+  <div id="definitionOutput"></div>
+
+  <script>
+	console.log("Available voices:", window.speechSynthesis.getVoices());
+    // ===== [1] VOICE DETECTION WORKAROUND (Fixes Android/Brave) =====
+    let voicesLoaded = false;
+
+    // Wait for voices to load (Chrome/Android requires this)
+    function loadVoices() {
+      return new Promise(resolve => {
+        const synth = window.speechSynthesis;
+        let voices = synth.getVoices();
+        
+        if (voices.length) {
+          resolve(voices);
+        } else {
+          synth.onvoiceschanged = () => {
+            voices = synth.getVoices();
+            resolve(voices);
+          };
+        }
+      });
+    }
+
+    // Check for Spanish voice and show icon if available
+    async function checkSpanishTTS() {
+      const voices = await loadVoices();
+      const spanishVoice = voices.find(voice => 
+        voice.lang === 'es-ES' || voice.lang.startsWith('es-')
+      );
+
+      if (spanishVoice) {
+        document.getElementById('speakerIcon').style.display = 'inline-block';
+      } else {
+        console.warn("Spanish TTS not available. Hiding speaker icon.");
+      }
+      voicesLoaded = true;
+    }
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', checkSpanishTTS);
+
+    // ===== [2] PRONUNCIATION FUNCTION =====
+    async function pronounceWord() {
+      if (!voicesLoaded) await checkSpanishTTS(); // Ensure voices are ready
+
+      const word = document.getElementById("wordInput").value.trim();
+      if (!word) return;
+
+      const synth = window.speechSynthesis;
+      const voices = synth.getVoices();
+      const spanishVoice = voices.find(voice => 
+        voice.lang === 'es-ES' || voice.lang.startsWith('es-')
+      );
+
+      if (spanishVoice) {
+        const utterance = new SpeechSynthesisUtterance(word);
+        utterance.voice = spanishVoice;
+        utterance.lang = 'es-ES';
+        synth.speak(utterance);
+      } else {
+        alert("Error: Voz en español no disponible en tu navegador.");
+      }
+    }
+
+    // ===== [3] RAE DEFINITION FETCH (Unchanged) =====
+    async function fetchRAEDefinition() {
+      const word = document.getElementById("wordInput").value.trim();
+      const output = document.getElementById("definitionOutput");
+
+      if (!word) {
+        output.innerHTML = "<p class='error'>⚠ Escribe una palabra.</p>";
+        return;
+      }
+
+      output.innerHTML = "<p class='loading'>Buscando en RAE...</p>";
+
+      try {
+        const proxyUrl = "https://api.allorigins.win/get?url=";
+        const raeUrl = `https://dle.rae.es/${encodeURIComponent(word)}`;
+        const response = await fetch(proxyUrl + encodeURIComponent(raeUrl));
+        const data = await response.json();
+
+        const parser = new DOMParser();
+        const htmlDoc = parser.parseFromString(data.contents, "text/html");
+        const definitionElements = htmlDoc.querySelectorAll("p.j, .j");
+        const articleHeader = htmlDoc.querySelector("header.article-header");
+
+        if (!definitionElements.length && !articleHeader) {
+          output.innerHTML = "<p class='error'>❌ Palabra no encontrada en RAE.</p>";
+          return;
+        }
+
+        let definitionsHTML = "";
+        if (articleHeader) definitionsHTML += `<h3>${articleHeader.textContent.trim()}</h3>`;
+        if (definitionElements.length) {
+          definitionsHTML += "<ol>";
+          definitionElements.forEach(el => {
+            definitionsHTML += `<li class="definition-item">${el.textContent.trim()}</li>`;
+          });
+          definitionsHTML += "</ol>";
+        }
+        definitionsHTML += `<p><a href="${raeUrl}" target="_blank">Ver en RAE ↗</a></p>`;
+        output.innerHTML = definitionsHTML;
+      } catch (error) {
+        output.innerHTML = "<p class='error'>❌ Error al conectar con RAE. Intenta más tarde.</p>";
+      }
+    }
+
+    // ===== [4] ENTER KEY HANDLER =====
+    function handleKeyPress(event) {
+      if (event.key === "Enter") fetchRAEDefinition();
+    }
+  </script>
+</body>
+</html>
