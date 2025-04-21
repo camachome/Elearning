@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Tutor with Mistral AI</title>
+    <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        #chat-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        #chatbox {
+            height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+        .user-message {
+            background-color: #e3f2fd;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        .ai-message {
+            background-color: #f1f1f1;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        #input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        #userInput {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        #controls {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 12px 20px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            flex: 1;
+        }
+        button:hover {
+            background-color: #3367d6;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #voice-selector {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            background-color: white;
+            font-size: 16px;
+            flex: 1;
+        }
+        #status {
+            margin-top: 10px;
+            font-style: italic;
+            color: #6c757d;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            #controls {
+                flex-direction: column;
+            }
+            #chatbox {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <h1><img width= 50px src="https://www.wemakescholars.com/admin/uploads/providers/4ZKGIwX5YrV6QyD5eIwgrU2jNCdRuQ91.png" alt="Descripción de la imagen">
+Chat IA de Español de Negocios</h1>
+
+        <div id="chatbox">
+            <div class="message ai-message">Hola, bienvenido a nuesto chat IA para Españold e Negocios. Dime cómo puedo ayudarte.</div>
+        </div>
+        
+        <div id="input-area">
+            <input type="text" id="userInput" placeholder="Ingresa tu mensaje aquí...">
+        </div>
+        
+        <div id="controls">
+            <select id="voice-selector">
+                <option value="Spanish Female">Español</option>
+                <!--<option value="Spanish Latin American Female">American Female</option>
+                <option value="UK English Male">British Male</option>
+                <option value="US English Male">American Male</option>
+                <option value="Australian Female">Australian Female</option>
+-->
+            </select>
+	<button id="listenBtn">Comenzar a hablar</button>
+            <button id="sendBtn">Enviar Texto</button>
+        </div>
+        
+        <div id="status">Listo para practicar Español.</div>
+    </div>
+
+    <script>
+        // ⚠️ WARNING: For testing only - API key is exposed in client-side code
+        // In production, always use a backend proxy
+        const MISTRAL_API_KEY = "w8VGFPRhY6n9B6Ou41DNk7qSsF21jWw5";
+        
+        // DOM elements
+        const chatbox = document.getElementById("chatbox");
+        const userInput = document.getElementById("userInput");
+        const sendBtn = document.getElementById("sendBtn");
+        const listenBtn = document.getElementById("listenBtn");
+        const statusDiv = document.getElementById("status");
+        const voiceSelector = document.getElementById("voice-selector");
+        
+        // Initialize ResponsiveVoice
+        responsiveVoice.init();
+        
+        // Speech recognition setup
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        let isListening = false;
+        
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'es-ES';
+            
+            recognition.onstart = () => {
+                isListening = true;
+                statusDiv.textContent = "Escuchando...";
+                listenBtn.textContent = "Dejar de escuchar";
+                listenBtn.style.backgroundColor = "#dc3545";
+            };
+            
+            recognition.onend = () => {
+                isListening = false;
+                statusDiv.textContent = "Processing...";
+                listenBtn.textContent = "Comenzar a hablar";
+                listenBtn.style.backgroundColor = "#4285f4";
+            };
+            
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error", event.error);
+                statusDiv.textContent = `Error: ${event.error}`;
+                isListening = false;
+                listenBtn.textContent = "Comenzar a hablar";
+                listenBtn.style.backgroundColor = "#4285f4";
+            };
+            
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                userInput.value = transcript;
+                sendMessage(transcript);
+            };
+        } else {
+            listenBtn.disabled = true;
+            statusDiv.textContent = "Este navegador no reconoce el español hablado.";
+        }
+        
+        // Event listeners
+        listenBtn.addEventListener("click", () => {
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+        
+        sendBtn.addEventListener("click", () => {
+            if (userInput.value.trim()) {
+                sendMessage(userInput.value.trim());
+                userInput.value = '';
+            }
+        });
+        
+        userInput.addEventListener("keypress", (e) => {
+            if (e.key === 'Enter' && userInput.value.trim()) {
+                sendMessage(userInput.value.trim());
+                userInput.value = '';
+            }
+        });
+        
+        // Add message to conversation
+        function addMessage(text, isUser) {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message");
+            messageDiv.classList.add(isUser ? "user-message" : "ai-message");
+            messageDiv.textContent = text;
+            chatbox.appendChild(messageDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+        
+        // Send message to Mistral AI and get response
+        async function sendMessage(message) {
+            addMessage(message, true);
+            statusDiv.textContent = "Esperando la respuesta de la IA...";
+            
+            try {
+                // Call Mistral API
+                const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer w8VGFPRhY6n9B6Ou41DNk7qSsF21jWw5`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model:  "mistral-tiny",
+                        messages: [
+                            {
+                                "role": "system",
+                                "content": "Eres un tutor para aprendices del idioma español, enfocado en el tema de español para negocios. Tus estudiantes residen en Alemania pero proceden de diferentes nacionalidades y culturas, y por ende hablan diferentes idiomas. Su objetivo es aprender español para ponerlo en práctica en su residencia en países hispanoparlantes. De ser posible procesa cada entrada dentro del contexto de las entradas anteriores para que haya una conversación fluida con el usuario. Proporcione corrección amable y cada 10 minutos provea datos de interés relacionados con el tema español de negocios. "
+                            },
+                            {
+                                "role": "user",
+                                "content": message
+                            }
+                        ],
+                        temperature: 0.5,
+                        max_tokens: 1000,
+			model: "mistral-small-latest"
+                    })
+                });
+                
+                const data = await response.json();
+                const aiResponse = data.choices[0].message.content;
+                
+                addMessage(aiResponse, false);
+                speakResponse(aiResponse);
+                statusDiv.textContent = "Listo para practicar Español.";
+            } catch (error) {
+                console.error("Error getting AI response:", error);
+                addMessage("Lo siento, tengo problemas técnicos en este momento.", false);
+                statusDiv.textContent = "Error al recibir la respuesta";
+            }
+        }
+        
+        // Speak the response using ResponsiveVoice
+        function speakResponse(text) {
+            const selectedVoice = voiceSelector.value;
+            responsiveVoice.speak(text, selectedVoice, {
+                pitch: 1,
+                rate: 1,
+                volume: 1,
+                onstart: () => {
+                    statusDiv.textContent = "Hablando...";
+                },
+                onend: () => {
+                    statusDiv.textContent = "Estás listo para mejorar tu español de negocios?";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
