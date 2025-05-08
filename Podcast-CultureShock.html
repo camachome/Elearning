@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Bilingual Captions</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            background-color: #E9ECE3; /*#00FF00 Green screen for chromakey */
+            font-family: Arial, sans-serif;
+            width: 90vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .caption-container {
+            width: 80%;
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .english {
+            color: #174F94; /*#0000FF Blue */
+            font-size: 1.5em;
+            font-weight: bold;
+//            text-shadow: 
+//                -1px -1px 0 #000,
+//                1px -1px 0 #000,
+//                -1px 1px 0 #000,
+//                1px 1px 0 #000; /* Black outline */
+            margin-bottom: 1em;
+            line-height: 1.4;
+        }
+        
+        .spanish {
+            color: #13911F; /*#FFFF00 Yellow */
+            font-size: 1.5em;
+            font-weight: bold;
+//            text-shadow: 
+//                -1px -1px 0 #000,
+//                1px -1px 0 #000,
+//                -1px 1px 0 #000,
+//                1px 1px 0 #000; /* Black outline */
+            margin-top: 1;
+            line-height: 1.4;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .controls {
+            width: 90%;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 5px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .player-controls {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 5px 2px;
+            font-size: 1em;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            min-width: 80px;
+        }
+        
+        button:hover {
+            background-color: #9F0B18;
+        }
+        
+        .timeline {
+            width: 100%;
+            height: 10px;
+            background-color: #C6CCD3;//#444;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #1E90FF;
+            border-radius: 5px;
+            width: 0%;
+        }
+        
+        .time-display {
+            color: white;
+            font-size: 0.9em;
+            align-self: flex-start;
+            margin-bottom: 5px;
+        }
+        
+        .speed-controls {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            margin-top: 5px;
+            width: 100%;
+            //justify-content: space-between;
+            justify-content: right;
+        }
+        
+        select {
+            padding: 5px;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+            border: none;
+        }
+        
+        .highlight {
+            background-color: rgba(231, 232, 84, 0.8);
+            border-radius: 0px;
+            padding: 5px 0px;
+            transition: background-color 0.1s;
+        }
+        
+        .underlined {
+            text-decoration: underline;
+            text-decoration-color: white;
+            text-decoration-thickness: 3px;
+            text-underline-offset: 4px;
+        }
+        
+        .translation-hint {
+            font-size: 0.7em;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 2px 5px;
+            border-radius: 3px;
+            position: absolute;
+            transform: translateY(-1.5em);
+            z-index: 10;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 2px;
+        }
+        .logo {
+            max-width: 230px;
+            height: auto;
+        }
+
+	.tooltip {
+	  bottom: anchor(bottom);
+	  translate: 0 80%;
+	  border-radius: 0.5rem;
+
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #333;
+            color: white;
+            border: none;
+
+	}
+
+	h2 {
+            color: #142174;
+            font-family: 'Verdana', sans-serif;
+            font-size: 26px;
+//            background-color: #3F51B5;
+            padding: 5px;
+//            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2px;
+            margin-top: 2px;
+        }
+
+.word-clickable {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.word-clickable:active {
+    transform: scale(1.1);
+}
+.active-pronunciation {
+    background-color: rgba(255, 215, 0, 0.5) !important;
+    border-radius: 4px;
+}
+
+
+    </style>
+</head>
+<script src="https://code.responsivevoice.org/responsivevoice.js"></script>
+<script>
+    responsiveVoice.init();
+</script>
+<body>
+
+    <h2>Podcast: Culture Shock</h2>
+    <div class="controls">
+        <audio id="audio-player" controls style="display: none;"></audio>
+        
+        <div class="player-controls">
+            <button id="play-button">Play</button>
+            <button id="pause-button">Pause</button>
+            <button id="restart-button">Restart</button>
+            <button id="back-10">-10s</button>
+            <button id="forward-10">+10s</button>
+        </div>
+        
+        <div class="timeline" id="timeline">
+            <div class="progress" id="progress"></div>
+        </div>
+        
+        <div class="time-display">
+            <span id="current-time">00:00:00</span> / <span id="duration">00:00:00</span>            <span style="padding-right: 20px;"></span><label for="speed-select" style="color: white;">Playback Speed:</label>
+            <select id="speed-select">
+                <option value="0.25">0.25x</option>
+                <option value="0.5">0.5x</option>
+                <option value="0.75">0.75x</option>
+                <option value="1" selected>1.0x (Normal)</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x</option>
+                <option value="1.75">1.75x</option>
+                <option value="2">2.0x</option>
+            </select>
+        </div>
+
+    </div>
+
+    <div class="caption-container">
+        <div id="english-caption" class="english hidden"></div>
+        <div id="spanish-caption" class="spanish hidden"></div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const audioPlayer = document.getElementById('audio-player');
+        const playButton = document.getElementById('play-button');
+        const pauseButton = document.getElementById('pause-button');
+        const restartButton = document.getElementById('restart-button');
+        const back10Button = document.getElementById('back-10');
+        const forward10Button = document.getElementById('forward-10');
+        const timeline = document.getElementById('timeline');
+        const progress = document.getElementById('progress');
+        const currentTimeDisplay = document.getElementById('current-time');
+        const durationDisplay = document.getElementById('duration');
+        const englishDiv = document.getElementById('english-caption');
+        const spanishDiv = document.getElementById('spanish-caption');
+        const speedSelect = document.getElementById('speed-select');
+
+        // Caption data with word timings and underlined words
+        const captions = [
+            {
+startTime: "00:00:00,031",
+endTime: "00:00:05,938",
+english: "Welcome to the Deep Dive. So you're here because you're thinking about it, maybe",
+spanish: "Bienvenido al Deep Dive. Así que estás aquí porque lo estás considerando, tal vez"
+},
+            {
+startTime: "00:00:06,018",
+endTime: "00:00:10,504",
+english: "even planning it, really diving into an English-speaking world. Yeah. Could be",
+spanish: "incluso planeándolo, sumergirte de lleno en un mundo de habla inglesa. Sí. Podría ser"
+},
+            {
+startTime: "00:00:10,544",
+endTime: "00:00:15,009",
+english: "for school, a job, or maybe just, you know, the adventure of living somewhere new",
+spanish: "para la escuela, un trabajo, o quizás solo, ya sabes, la aventura de vivir en un lugar nuevo"
+},
+            {
+startTime: "00:00:15,069",
+endTime: "00:00:18,093",
+english: "where English is all around you. Right. And you've probably got a checklist, as",
+spanish: "donde el inglés te rodea. Exacto. Y probablemente tengas una lista de tareas, tan"
+},
+            {
+startTime: "00:00:18,153",
+endTime: "00:00:22,058",
+english: "long as you're armed, sorting out studies, money, saying those tough",
+spanish: "larga como tu preparación: organizar estudios, dinero, despedirte de los que más cuesta"
+},
+            {
+startTime: "00:00:22,078",
+endTime: "00:00:25,903",
+english: "goodbyes, booking flights. And brushing up on your English, of course. That's a big",
+spanish: "decir adiós, reservar vuelos. Y, por supuesto, mejorar tu inglés. Eso es algo muy"
+},
+            {
+startTime: "00:00:25,983",
+endTime: " 00:00:30,85",
+english: "one. Definitely. But here's the thing we want to dig into today. You land, you've",
+spanish: "importante. Definitivamente. Pero aquí está lo que queremos explorar hoy. Llegas, tienes"
+},
+            {
+startTime: "00:00:30,89 ",
+endTime: "00:00:35,297",
+english: "got your bags, you're excited. Does everything just click into place",
+spanish: "tus maletas, estás emocionado. ¿Todo simplemente encaja perfectamente"
+},
+            {
+startTime: "00:00:35,397",
+endTime: "00:00:38,982",
+english: "smoothly? Well, for most people, probably not immediately. There's",
+spanish: "sin problemas? Bueno, para la mayoría, probablemente no de inmediato. Suele haber"
+},
+            {
+startTime: "00:00:39,123",
+endTime: " 00:00:43,75",
+english: "usually a bit of an adjustment period when you're surrounded by a whole new culture.",
+spanish: "un período de ajuste cuando estás rodeado de una cultura completamente nueva."
+},
+            {
+startTime: "00:00:43,97 ",
+endTime: "00:00:47,696",
+english: "And that adjustment, that feeling, is what we're calling culture shock. That's",
+spanish: "Y ese ajuste, esa sensación, es lo que llamamos choque cultural. Ese es"
+},
+            {
+startTime: "00:00:47,756",
+endTime: "00:00:50,941",
+english: "our focus for this deep dive. Exactly. We want to help you understand what it",
+spanish: "nuestro enfoque en este deep dive. Exactamente. Queremos ayudarte a entender qué es"
+},
+            {
+startTime: "00:00:51,121",
+endTime: "00:00:54,345",
+english: "actually is. It's a totally natural thing. We'll look at the stages people",
+spanish: "realmente. Es algo totalmente natural. Veremos las etapas que las personas"
+},
+            {
+startTime: "00:00:54,425",
+endTime: "00:00:58,109",
+english: "often go through, and maybe more importantly, give you some practical",
+spanish: "suelen atravesar y, quizás más importante, darte estrategias prácticas"
+},
+            {
+startTime: "00:00:58,149",
+endTime: "00:01:03,354",
+english: "ways to handle it. It's sort of a shortcut, based on research and experience, to feel",
+spanish: "para manejarlo. Es como un atajo, basado en investigación y experiencia, para sentirte"
+},
+            {
+startTime: "00:01:03,414",
+endTime: "00:01:06,397",
+english: "a bit more ready for what might come up during your immersion. Okay, so let's",
+spanish: "un poco más preparado ante lo que pueda surgir durante tu inmersión. Bien, comencemos"
+},
+            {
+startTime: "00:01:06,417",
+endTime: "00:01:11,583",
+english: "start with the basics. What exactly is culture shock? How do we define it? Okay,",
+spanish: "con lo básico. ¿Qué es exactamente el choque cultural? ¿Cómo lo definimos? Vale,"
+},
+            {
+startTime: "00:01:11,603",
+endTime: "00:01:16,408",
+english: "yeah. So, broadly speaking, it's that experience someone has when they move",
+spanish: "sí. En términos generales, es la experiencia que alguien tiene al mudarse"
+},
+            {
+startTime: "00:01:16,468",
+endTime: "00:01:20,151",
+english: "into a cultural setting that's, well, really different from their own.",
+spanish: "a un entorno cultural muy diferente al suyo."
+},
+            {
+startTime: "00:01:20,232",
+endTime: "00:01:24,148",
+english: "Different how, though? Like, just the language. It's often more than just",
+spanish: "¿Diferente en qué sentido? ¿Solo el idioma? Suele ser más que solo"
+},
+            {
+startTime: "00:01:24,208",
+endTime: "00:01:29,295",
+english: "language. It's a kind of personal disorientation. You're dealing with an",
+spanish: "el idioma. Es una especie de desorientación personal. Estás lidiando con un"
+},
+            {
+startTime: "00:01:29,396",
+endTime: "00:01:33,722",
+english: "unfamiliar way of life. So it could happen moving to a new country, obviously, like",
+spanish: "estilo de vida desconocido. Así que puede ocurrir al mudarte a un nuevo país, obviamente, como"
+},
+            {
+startTime: "00:01:33,862",
+endTime: "00:01:36,566",
+english: "for the English immersion you're planning. For sure. That's a classic",
+spanish: "en la inmersión en inglés que estás planeando. Claro. Ese es un caso"
+},
+            {
+startTime: "00:01:36,586",
+endTime: "00:01:40,972",
+english: "case. But it can also happen if you immigrate or even just visit a new country",
+spanish: "clásico. Pero también puede pasar si emigras o incluso si solo visitas un nuevo país"
+},
+            {
+startTime: "00:01:40,992",
+endTime: "00:01:44,798",
+english: "for a while. Or moving between really different social groups, maybe. Or even a",
+spanish: "por un tiempo. O al cambiar entre grupos sociales muy distintos, quizás. O incluso con un"
+},
+            {
+startTime: "00:01:44,838",
+endTime: "00:01:50,142",
+english: "big life change. Yeah, any situation that takes you out of your familiar normal. But",
+spanish: "gran cambio de vida. Sí, cualquier situación que te saque de tu normalidad familiar. Pero"
+},
+            {
+startTime: "00:01:50,262",
+endTime: "00:01:54,066",
+english: "for you listening, thinking about that English-speaking environment, that's",
+spanish: "para ti, que estás pensando en ese entorno de habla inglesa, ese es"
+},
+            {
+startTime: "00:01:54,106",
+endTime: "00:01:58,491",
+english: "probably the most relevant context, being a foreigner, essentially. It feels",
+spanish: "probablemente el contexto más relevante: ser un extranjero, básicamente. Parece"
+},
+            {
+startTime: "00:01:58,531",
+endTime: "00:02:02,915",
+english: "like a modern term, but it's actually been around a while, hasn't it? It has. Coeur",
+spanish: "un término moderno, pero en realidad existe desde hace tiempo, ¿no? Así es. Coeur"
+},
+            {
+startTime: "00:02:02,935",
+endTime: " 00:02:07,74",
+english: "d'Ivoire, an anthropologist, first used the term 'culture shock' way back in 1951.",
+spanish: "d'Ivoire, un antropólogo, usó por primera vez el término 'choque cultural' allá en 1951."
+},
+            {
+startTime: "00:02:07,861",
+endTime: "00:02:12,045",
+english: "Wow, okay. And then Klervo Oberg, he really ran with it. He didn't just see it as",
+spanish: "Vaya, vale. Y luego Klervo Oberg lo desarrolló. No lo vio como"
+},
+            {
+startTime: "00:02:12,085",
+endTime: " 00:02:17,42",
+english: "a single shock, but more like, like a process you go through, stages. So not",
+spanish: "un solo golpe, sino más como un proceso con etapas. Así que no es"
+},
+            {
+startTime: "00:02:17,46 ",
+endTime: "00:02:21,106",
+english: "just hitting a wall, but more like navigating a path, maybe with some bumps.",
+spanish: "solo chocar contra un muro, sino más bien navegar un camino con algunos baches."
+},
+            {
+startTime: "00:02:21,266",
+endTime: "00:02:27,537",
+english: "Exactly. And then Ronald Taft in 77, he really broke down why it happens, what",
+spanish: "Exactamente. Y luego Ronald Taft en el 77 analizó por qué ocurre y qué"
+},
+            {
+startTime: "00:02:27,637",
+endTime: "00:02:31,884",
+english: "contributes to it. His work is super helpful. What kind of factors did Taft",
+spanish: "factores lo influyen. Su trabajo es súper útil. ¿Qué tipo de factores identificó"
+},
+            {
+startTime: "00:02:32,004",
+endTime: "00:02:36,223",
+english: "identify? Well, first, there's just the basic stress. You have to make all these",
+spanish: "Taft? Bueno, primero, está el estrés básico. Tienes que hacer constantes"
+},
+            {
+startTime: "00:02:36,243",
+endTime: "00:02:39,766",
+english: "psychological adjustments constantly. Like figuring out new rules all the time.",
+spanish: "ajustes psicológicos. Como descifrar nuevas reglas todo el tiempo."
+},
+            {
+startTime: "00:02:39,846",
+endTime: "00:02:43,149",
+english: "Yeah, processing new info, reading social cues that are different, maybe",
+spanish: "Sí, procesar información nueva, interpretar señales sociales diferentes, quizás"
+},
+            {
+startTime: "00:02:43,189",
+endTime: "00:02:47,112",
+english: "questioning things you took for granted. It's mentally taxing. I can imagine. It",
+spanish: "cuestionar cosas que dabas por sentado. Es mentalmente agotador. Me lo imagino."
+},
+            {
+startTime: "00:02:47,172",
+endTime: "00:02:52,837",
+english: "sounds exhausting. It can be. Then Taff talked about loss, a real sense of loss.",
+spanish: "Suena agotador. Puede serlo. Luego, Taft habló de la pérdida, una sensación real de pérdida."
+},
+            {
+startTime: "00:02:52,917",
+endTime: "00:02:57,121",
+english: "Loss of what? Friends you left behind, maybe your social standing, your job",
+spanish: "¿Pérdida de qué? Amigos que dejaste atrás, quizás tu estatus social, tu puesto"
+},
+            {
+startTime: "00:02:57,161",
+endTime: "00:03:01,525",
+english: "title, even just familiar things, possessions. It's an emotional weight.",
+spanish: "de trabajo, incluso cosas cotidianas, posesiones. Es un peso emocional."
+},
+            {
+startTime: "00:03:01,572",
+endTime: "00:03:05,917",
+english: "That makes sense. You're leaving a whole life behind, in a way. Totally. And then",
+spanish: "Tiene sentido. En cierto modo, estás dejando atrás toda una vida. Totalmente. Y luego"
+},
+            {
+startTime: "00:03:05,977",
+endTime: "00:03:10,361",
+english: "there's that feeling of maybe being rejected by the new culture, or maybe you",
+spanish: "está esa sensación de ser rechazado por la nueva cultura, o quizás tú"
+},
+            {
+startTime: "00:03:10,381",
+endTime: "00:03:13,384",
+english: "start rejecting parts of it. Oh, interesting. So it can go both ways.",
+spanish: "comienzas a rechazar partes de ella. Oh, interesante. Así que puede ir en ambos sentidos."
+},
+            {
+startTime: "00:03:13,625",
+endTime: "00:03:17,869",
+english: "Right. And that can cause some internal conflict. Plus, confusion about your",
+spanish: "Correcto. Y eso puede causar conflicto interno. Además, confusión sobre tu"
+},
+            {
+startTime: "00:03:17,949",
+endTime: "00:03:22,654",
+english: "role. What are people expecting from you? How do you fit in? And maybe questioning",
+spanish: "rol. ¿Qué esperan los demás de ti? ¿Cómo encajas? Y tal vez cuestionar"
+},
+            {
+startTime: "00:03:22,694",
+endTime: "00:03:27,239",
+english: "your own values, even. Definitely. Your identity can feel a bit shaky when you're",
+spanish: "tus propios valores. Definitivamente. Tu identidad puede sentirse un poco inestable fuera"
+},
+            {
+startTime: "00:03:27,299",
+endTime: "00:03:31,794",
+english: "outside your usual context. Taff mentioned that. Like the ground rules",
+spanish: "de tu contexto habitual. Taft lo mencionó. Como si las reglas básicas"
+},
+            {
+startTime: "00:03:31,854",
+endTime: "00:03:36,968",
+english: "have changed. Precisely. And don't forget surprise, anxiety, maybe even",
+spanish: "hubieran cambiado. Precisamente. Y no olvides la sorpresa, la ansiedad, incluso"
+},
+            {
+startTime: "00:03:37,008",
+endTime: " 00:03:41,44",
+english: "indignation or frustration when you realize just how different things are.",
+spanish: "la indignación o frustración al darte cuenta de cuán diferentes son las cosas."
+},
+            {
+startTime: "00:03:41,701",
+endTime: " 00:03:45,43",
+english: "Things you thought were universal. Yeah, those, wait, they do what? The moments.",
+spanish: "Cosas que creías universales. Sí, esos momentos de ¿espera, hacen qué?."
+},
+            {
+startTime: "00:03:45,571",
+endTime: "00:03:49,218",
+english: "Exactly, those. And finally, Taft pointed out that feeling of",
+spanish: "Exacto, esos. Y finalmente, Taft señaló esa sensación de"
+},
+            {
+startTime: "00:03:49,298",
+endTime: "00:03:53,142",
+english: "powerlessness, like you just don't quite know how to cope effectively,",
+spanish: "impotencia, como que no sabes muy bien cómo manejar las situaciones eficazmente,"
+},
+            {
+startTime: "00:03:53,403",
+endTime: "00:03:56,406",
+english: "especially, you know, if your English isn't quite fluent yet in real world",
+spanish: "especialmente, ya sabes, si tu inglés no es aún fluido en situaciones"
+},
+            {
+startTime: "00:03:56,446",
+endTime: "00:04:00,672",
+english: "situations. Wow. Okay. So Taft really painted a picture. It's much more complex",
+spanish: "del mundo real. Guau. Vale. Así que Taft realmente pintó un panorama. Es mucho más complejo"
+},
+            {
+startTime: "00:04:00,712",
+endTime: "00:04:04,196",
+english: "than just feeling a bit homesick or confused. It really is. And that's why",
+spanish: "que simplemente sentir nostalgia o confusión. Realmente lo es. Y por eso"
+},
+            {
+startTime: "00:04:04,256",
+endTime: "00:04:07,800",
+english: "understanding it is so important in intercultural communication studies",
+spanish: "entenderlo es tan importante en estudios de comunicación intercultural"
+},
+            {
+startTime: "00:04:08,221",
+endTime: "00:04:13,117",
+english: "and really useful for you preparing for immersion. The goal being to maybe lessen",
+spanish: "y muy útil para prepararte para la inmersión. El objetivo es quizás suavizar"
+},
+            {
+startTime: "00:04:13,157",
+endTime: "00:04:16,603",
+english: "the blow. Yeah, to try and make the transition smoother. But like our",
+spanish: "el golpe. Sí, intentar que la transición sea más suave. Pero como dicen"
+},
+            {
+startTime: "00:04:16,643",
+endTime: " 00:04:20,79",
+english: "sources say, you can't really prevent it entirely. Everyone reacts differently",
+spanish: "nuestras fuentes, no puedes prevenirlo completamente. Cada quien reacciona diferente"
+},
+            {
+startTime: "00:04:20,91 ",
+endTime: "00:04:25,358",
+english: "to cultural contrasts. It's very personal. OK, so it's normal, it's",
+spanish: "a los contrastes culturales. Es muy personal. OK, entonces es normal, es"
+},
+            {
+startTime: "00:04:25,418",
+endTime: "00:04:30,167",
+english: "complex, and it's probably going to happen to some extent. What about these",
+spanish: "complejo, y probablemente ocurrirá en cierta medida. ¿Y qué hay de estas"
+},
+            {
+startTime: "00:04:30,247",
+endTime: "00:04:34,209",
+english: "stages you mentioned Oberg talked about? Is there a typical journey? Yeah,",
+spanish: "etapas que mencionaste de Oberg? ¿Hay un camino típico? Sí,"
+},
+            {
+startTime: "00:04:34,349",
+endTime: "00:04:39,103",
+english: "thinking in stages is a common way to frame it. Oberg's model is probably the best",
+spanish: "pensar en etapas es una forma común de entenderlo. El modelo de Oberg es probablemente el más"
+},
+            {
+startTime: "00:04:39,163",
+endTime: "00:04:43,414",
+english: "known. It has four phases, and people often draw it like a U-curve. A U-curve.",
+spanish: "conocido. Tiene cuatro fases, y a menudo se grafica como una curva U. Una curva U."
+},
+            {
+startTime: "00:04:43,434",
+endTime: "00:04:46,864",
+english: "Okay, what's the top of the U like, the beginning? Well, that first bit, the",
+spanish: "Vale, ¿cómo es la parte superior de la U, el inicio? Bueno, esa primera parte, la"
+},
+            {
+startTime: "00:04:46,904",
+endTime: "00:04:51,139",
+english: "downward slope into the U, is often called the honeymoon stage. Honeymoon. Sounds",
+spanish: "bajada hacia la U, suele llamarse etapa de luna de miel. Luna de miel. Suena"
+},
+            {
+startTime: "00:04:51,259",
+endTime: "00:04:55,408",
+english: "nice. It often is, initially. You've just arrived in your new English-speaking",
+spanish: "bien. Suele serlo, al principio. Acabas de llegar a tu nuevo lugar de habla inglesa."
+},
+            {
+startTime: "00:04:55,448",
+endTime: "00:05:00,198",
+english: "place. Everything seems exciting, new, maybe even romanticized. Like finding",
+spanish: "Todo parece emocionante, nuevo, quizás incluso idealizado. Como encontrar"
+},
+            {
+startTime: "00:05:00,238",
+endTime: "00:05:04,808",
+english: "the differences charming. Exactly. Loving the new food. The pace of life seems",
+spanish: "las diferencias encantadoras. Exactamente. Amar la comida nueva. El ritmo de vida parece"
+},
+            {
+startTime: "00:05:04,868",
+endTime: "00:05:07,593",
+english: "interesting. Local habits are fascinating. You're seeing the",
+spanish: "interesante. Las costumbres locales son fascinantes. Estás viendo los"
+},
+            {
+startTime: "00:05:07,654",
+endTime: "00:05:12,284",
+english: "positives. And early interactions might be quite good. Often, yeah. People might",
+spanish: "aspectos positivos. Y las primeras interacciones pueden ser bastante buenas. A menudo, sí. La gente puede"
+},
+            {
+startTime: "00:05:12,304",
+endTime: "00:05:16,992",
+english: "be polite, helpful, maybe curious about where you're from. This stage can last the",
+spanish: "ser educada, servicial, quizás curiosa sobre tu origen. Esta etapa puede durar las"
+},
+            {
+startTime: "00:05:17,032",
+endTime: " 00:05:21,28",
+english: "first few weeks, maybe a bit longer. Like being on holiday almost. Everything's an",
+spanish: "primeras semanas, quizás un poco más. Como estar de vacaciones casi. Todo es una"
+},
+            {
+startTime: "00:05:21,34 ",
+endTime: "00:05:24,626",
+english: "adventure. You're not bogged down in the day-to-day difficulties yet. Pretty",
+spanish: "aventura. Aún no estás agobiado por las dificultades cotidianas. Bastante"
+},
+            {
+startTime: "00:05:24,666",
+endTime: "00:05:29,555",
+english: "much. But, you know, like most honeymoons, it tends to end. Ah, okay.",
+spanish: "así. Pero, ya sabes, como la mayoría de las lunas de miel, tiende a terminar. Ah, vale."
+},
+            {
+startTime: "00:05:30,376",
+endTime: "00:05:35,147",
+english: "Reality bites. What comes next? The bottom of the U. That's the negotiation,",
+spanish: "La realidad golpea. ¿Qué sigue? El fondo de la U. Esa es la etapa de negociación,"
+},
+            {
+startTime: "00:05:35,587",
+endTime: "00:05:39,553",
+english: "or sometimes called the conflict stage. This usually kicks in maybe around the",
+spanish: "o a veces llamada etapa de conflicto. Esto suele comenzar alrededor del"
+},
+            {
+startTime: "00:05:39,614",
+endTime: "00:05:44,000",
+english: "three month mark, give or take. And what happens then? Well, the differences that",
+spanish: "tercer mes, más o menos. ¿Y qué pasa entonces? Bueno, las diferencias que"
+},
+            {
+startTime: "00:05:44,04 ",
+endTime: "00:05:49,509",
+english: "seemed charming before, now they start to feel less charming. They become more",
+spanish: "antes parecían encantadoras, ahora empiezan a sentirse menos encantadoras. Se vuelven más"
+},
+            {
+startTime: "00:05:49,549",
+endTime: "00:05:54,156",
+english: "apparent in your daily life and can create anxiety, frustration, maybe even anger.",
+spanish: "evidentes en tu vida diaria y pueden crear ansiedad, frustración, quizás incluso enojo."
+},
+            {
+startTime: "00:05:54,305",
+endTime: "00:05:58,375",
+english: "So the novelty wears off and the small things start to grate. Exactly. You might",
+spanish: "Así que la novedad desaparece y las pequeñas cosas empiezan a molestar. Exactamente. Podrías"
+},
+            {
+startTime: "00:05:58,415",
+endTime: "00:06:02,986",
+english: "encounter things that feel weird or wrong or just plain inefficient compared to",
+spanish: "encontrar cosas que se sienten raras, incorrectas o simplemente ineficientes comparadas con"
+},
+            {
+startTime: "00:06:03,006",
+endTime: "00:06:06,996",
+english: "back home. And it happens repeatedly. What kinds of things are we talking about?",
+spanish: "tu país. Y ocurre repetidamente. ¿De qué tipo de cosas estamos hablando?"
+},
+            {
+startTime: "00:06:07,056",
+endTime: "00:06:11,226",
+english: "Especially for someone navigating in English. Oh, lots of things. Language",
+spanish: "Especialmente para alguien navegando en inglés. Oh, muchas cosas. Las barreras"
+},
+            {
+startTime: "00:06:11,266",
+endTime: "00:06:16,216",
+english: "barriers become a much bigger deal. You might find understanding fast speech,",
+spanish: "del idioma se vuelven mucho más importantes. Podrías encontrar que entender habla rápida,"
+},
+            {
+startTime: "00:06:16,376",
+endTime: "00:06:20,604",
+english: "slang, or accents much harder than you expected from classes. Yeah, textbook",
+spanish: "jerga o acentos es mucho más difícil de lo que esperabas en clases. Sí, el inglés de"
+},
+            {
+startTime: "00:06:20,644",
+endTime: "00:06:24,612",
+english: "English versus real world English can be miles apart. Totally. Differences in",
+spanish: "libros versus el inglés real pueden ser muy diferentes. Totalmente. Diferencias en"
+},
+            {
+startTime: "00:06:24,652",
+endTime: "00:06:28,439",
+english: "public hygiene standards, traffic rules, how easy it is to find the food you",
+spanish: "estándares de higiene pública, reglas de tráfico, qué tan fácil es encontrar la comida que"
+},
+            {
+startTime: "00:06:28,479",
+endTime: "00:06:32,887",
+english: "like, or even the quality. It can all start to feel disconnecting. Practical stuff",
+spanish: "te gusta, o incluso la calidad. Todo puede empezar a sentirse desconcertante. Las cosas prácticas"
+},
+            {
+startTime: "00:06:32,907",
+endTime: "00:06:36,631",
+english: "can become a real headache. Definitely. Our sources mention things like",
+spanish: "pueden convertirse en un verdadero dolor de cabeza. Definitivamente. Nuestras fuentes mencionan cosas como"
+},
+            {
+startTime: "00:06:36,671",
+endTime: "00:06:40,195",
+english: "communication pressure, just feeling constant. Even physical stuff, your",
+spanish: "la presión comunicativa, esa sensación constante. Incluso cosas físicas, tu"
+},
+            {
+startTime: "00:06:40,315",
+endTime: " 00:06:44,66",
+english: "sleep schedule might be off, insomnia, drowsiness. Jet lag, but maybe longer",
+spanish: "horario de sueño puede desajustarse, insomnio, somnolencia. Jet lag, pero quizás más"
+},
+            {
+startTime: "00:06:44,7 -",
+endTime: "00:06:49,425",
+english: "lasting. Sort of, yeah. Your body adjusting. Even your gut adapting to",
+spanish: "duradero. Algo así, sí. Tu cuerpo ajustándose. Incluso tu estómago adaptándose a"
+},
+            {
+startTime: "00:06:49,465",
+endTime: "00:06:52,168",
+english: "different food and water. Yeah. And trying to get medical help can be",
+spanish: "comida y agua diferentes. Sí. Y tratar de obtener ayuda médica puede ser"
+},
+            {
+startTime: "00:06:52,428",
+endTime: "00:06:55,591",
+english: "stressful if medicine names are different or the system is confusing.",
+spanish: "estresante si los nombres de los medicamentos son diferentes o el sistema es confuso."
+},
+            {
+startTime: "00:06:55,611",
+endTime: "00:07:00,181",
+english: "That all sounds quite stressful when piled up. It is. But the really crucial bit",
+spanish: "Todo eso suena bastante estresante cuando se acumula. Lo es. Pero lo realmente crucial"
+},
+            {
+startTime: "00:07:00,242",
+endTime: " 00:07:04,87",
+english: "in this stage is often communication. Beyond just the words. Absolutely. It's",
+spanish: "en esta etapa suele ser la comunicación. Más allá de las palabras. Absolutamente. Es"
+},
+            {
+startTime: "00:07:04,89 ",
+endTime: "00:07:08,415",
+english: "the feeling of loneliness, homesickness, because maybe you haven't",
+spanish: "la sensación de soledad, nostalgia, porque quizás no has"
+},
+            {
+startTime: "00:07:08,515",
+endTime: "00:07:12,841",
+english: "built deep connections yet and you're constantly trying to understand and be",
+spanish: "construido conexiones profundas y estás constantemente tratando de entender y ser"
+},
+            {
+startTime: "00:07:12,921",
+endTime: "00:07:17,367",
+english: "understood by new people, often in your second language. That constant effort",
+spanish: "entendido por nuevas personas, a menudo en tu segundo idioma. Ese esfuerzo constante"
+},
+            {
+startTime: "00:07:17,527",
+endTime: "00:07:22,234",
+english: "must be draining. It really is. Think about body language, tone of voice,",
+spanish: "debe ser agotador. Realmente lo es. Piensa en el lenguaje corporal, el tono de voz,"
+},
+            {
+startTime: "00:07:22,675",
+endTime: " 00:07:26,66",
+english: "making accidental mistakes, understanding nuances, maybe false",
+spanish: "cometer errores accidentales, entender matices, quizás los falsos"
+},
+            {
+startTime: "00:07:26,74 ",
+endTime: "00:07:31,912",
+english: "friends, words that look similar but mean different things. It's a minefield. I can",
+spanish: "amigos (palabras similares pero con significados diferentes). Es un campo minado. Puedo"
+},
+            {
+startTime: "00:07:32,053",
+endTime: "00:07:35,797",
+english: "see how that would lead to feeling isolated, even if you're around people.",
+spanish: "ver cómo eso llevaría a sentirse aislado, incluso estando rodeado de gente."
+},
+            {
+startTime: "00:07:35,957",
+endTime: "00:07:39,641",
+english: "Yeah. It can go deeper, too. Some people start to feel confused about their",
+spanish: "Sí. Puede ir más allá también. Algunos empiezan a sentirse confundidos sobre su"
+},
+            {
+startTime: "00:07:39,681",
+endTime: "00:07:44,406",
+english: "identity. How so? Like, how much of your old self do you keep? How much do you adapt",
+spanish: "identidad. ¿Cómo así? Como, ¿cuánto de tu viejo yo conservas? ¿Cuánto adaptas"
+},
+            {
+startTime: "00:07:44,446",
+endTime: " 00:07:47,79",
+english: "to fit in with this new English-speaking culture? Finding that balance can be",
+spanish: "para encajar en esta nueva cultura de habla inglesa? Encontrar ese equilibrio puede ser"
+},
+            {
+startTime: "00:07:47,83 ",
+endTime: "00:07:52,515",
+english: "really tough. A kind of internal tug of war. Exactly. And that can lead to just",
+spanish: "realmente difícil. Una especie de lucha interna. Exactamente. Y eso puede llevar a"
+},
+            {
+startTime: "00:07:52,555",
+endTime: " 00:07:57,24",
+english: "feeling tired all the time or even quite down. And for students, being away from",
+spanish: "sentirse cansado todo el tiempo o incluso bastante deprimido. Y para los estudiantes, estar lejos del"
+},
+            {
+startTime: "00:07:57,3 -",
+endTime: "00:08:00,384",
+english: "family support makes it even harder. Especially if the cultures are very",
+spanish: "apoyo familiar lo hace aún más difícil. Especialmente si las culturas son muy"
+},
+            {
+startTime: "00:08:00,464",
+endTime: " 00:08:04,51",
+english: "different in terms of, say, how you're expected to participate in class or argue",
+spanish: "diferentes en términos de, digamos, cómo se espera que participes en clase o discutas"
+},
+            {
+startTime: "00:08:04,55 ",
+endTime: " 00:08:11,62",
+english: "a point. Precisely. Logic, speech styles, rhetoric, these can vary hugely",
+spanish: "un punto. Precisamente. La lógica, estilos de habla, retórica, estos pueden variar enormemente"
+},
+            {
+startTime: "00:08:11,66 ",
+endTime: "00:08:15,786",
+english: "and add another layer of stress for students. Okay, so this negotiation",
+spanish: "y añadir otra capa de estrés para los estudiantes. Vale, entonces esta etapa de negociación"
+},
+            {
+startTime: "00:08:15,866",
+endTime: "00:08:20,868",
+english: "stage sounds like the real low point of the U-curve. It sounds tough. What happens",
+spanish: "suena como el verdadero punto bajo de la curva U. Suena difícil. ¿Qué ocurre"
+},
+            {
+startTime: "00:08:20,908",
+endTime: "00:08:25,214",
+english: "next? Do things start looking up? Yes, thankfully. The third stage is the",
+spanish: "después? ¿Las cosas empiezan a mejorar? Sí, afortunadamente. La tercera etapa es la"
+},
+            {
+startTime: "00:08:25,274",
+endTime: "00:08:30,081",
+english: "adjustment stage. This usually starts somewhere between, say, six and 12 months",
+spanish: "etapa de ajuste. Esto suele comenzar en algún momento entre, digamos, seis y doce meses"
+},
+            {
+startTime: "00:08:30,181",
+endTime: "00:08:34,047",
+english: "in. Adjustment, so getting used to things. Pretty much. You start to feel",
+spanish: "después. Ajuste, es decir, acostumbrarse a las cosas. Básicamente. Empiezas a sentirte"
+},
+            {
+startTime: "00:08:34,067",
+endTime: "00:08:38,212",
+english: "more accustomed to the new culture. You develop routines. Daily life starts to",
+spanish: "más acostumbrado a la nueva cultura. Desarrollas rutinas. La vida diaria comienza a"
+},
+            {
+startTime: "00:08:38,272",
+endTime: "00:08:42,984",
+english: "feel more normal, less like a constant struggle. The feeling of being totally",
+spanish: "sentirse más normal, menos como una lucha constante. La sensación de estar completamente"
+},
+            {
+startTime: "00:08:43,085",
+endTime: "00:08:46,509",
+english: "overwhelmed starts to fade. Right. You're focusing more on just living your",
+spanish: "abrumado empieza a desaparecer. Correcto. Te enfocas más en simplemente vivir tu"
+},
+            {
+startTime: "00:08:46,569",
+endTime: "00:08:49,873",
+english: "life again. Yeah. You've figured out how to solve some of the common problems",
+spanish: "vida nuevamente. Sí. Has descubierto cómo resolver algunos de los problemas comunes"
+},
+            {
+startTime: "00:08:49,893",
+endTime: "00:08:53,698",
+english: "you're facing. You're learning the ropes. Exactly. And you start to accept",
+spanish: "que enfrentas. Estás aprendiendo los trucos. Exactamente. Y empiezas a aceptar"
+},
+            {
+startTime: "00:08:54,118",
+endTime: "00:08:58,063",
+english: "the culture's ways, maybe with a more positive attitude again. Things start to",
+spanish: "las formas de la cultura, quizás con una actitud más positiva nuevamente. Las cosas empiezan a"
+},
+            {
+startTime: "00:08:58,243",
+endTime: "00:09:01,367",
+english: "make sense in their own context. Your negative reactions lessen. So you're",
+spanish: "tener sentido en su propio contexto. Tus reacciones negativas disminuyen. Así que estás"
+},
+            {
+startTime: "00:09:01,387",
+endTime: " 00:09:04,07",
+english: "finding your equilibrium, building familiarity. Yeah, you're finding your",
+spanish: "encontrando tu equilibrio, construyendo familiaridad. Sí, estás encontrando tu"
+},
+            {
+startTime: "00:09:04,091",
+endTime: "00:09:07,635",
+english: "feet. And then comes the final stage, the upward swing of the U. That's",
+spanish: "lugar. Y luego viene la etapa final, el ascenso de la U. Eso es"
+},
+            {
+startTime: "00:09:07,875",
+endTime: "00:09:12,667",
+english: "adaptation. adaptation or a sometimes called mastery right of the bicultural",
+spanish: "adaptación. Adaptación o a veces llamado dominio, ¿verdad?, de la etapa"
+},
+            {
+startTime: "00:09:12,707",
+endTime: "00:09:16,113",
+english: "stage. This is where you can function fully and comfortably within the host",
+spanish: "bicultural. Aquí es donde puedes funcionar plena y cómodamente dentro de la cultura"
+},
+            {
+startTime: "00:09:16,153",
+endTime: "00:09:21,442",
+english: "culture. Does that mean you become just like a native. Not necessarily. Mastery",
+spanish: "anfitriona. ¿Significa eso que te vuelves como un nativo? No necesariamente. Dominio"
+},
+            {
+startTime: "00:09:21,482",
+endTime: "00:09:24,908",
+english: "doesn't mean you lose your original culture. You probably still have your",
+spanish: "no significa que pierdas tu cultura original. Probablemente aún conserves tu"
+},
+            {
+startTime: "00:09:25,068",
+endTime: "00:09:28,214",
+english: "accent. Maybe you keep certain traditions from home. OK. So it's not",
+spanish: "acento. Quizás mantengas ciertas tradiciones de tu país. OK. Entonces no se trata"
+},
+            {
+startTime: "00:09:28,254",
+endTime: " 00:09:32,72",
+english: "about total assimilation. No, it's more about feeling comfortable, competent,",
+spanish: "de asimilación total. No, es más acerca de sentirse cómodo, competente,"
+},
+            {
+startTime: "00:09:33,02 ",
+endTime: "00:09:37,489",
+english: "and like you belong. You can navigate social situations easily, understand",
+spanish: "y como si pertenecieras. Puedes navegar situaciones sociales fácilmente, entender"
+},
+            {
+startTime: "00:09:37,509",
+endTime: "00:09:42,279",
+english: "the cultural cues, and feel genuinely at ease in both your original culture and the",
+spanish: "las señales culturales, y sentirte genuinamente a gusto tanto en tu cultura original como en la"
+},
+            {
+startTime: "00:09:42,339",
+endTime: "00:09:45,385",
+english: "new one. That sounds like a really positive place to reach. Feeling",
+spanish: "nueva. Eso suena como un lugar realmente positivo al que llegar. Sentirse"
+},
+            {
+startTime: "00:09:45,485",
+endTime: "00:09:49,184",
+english: "integrated but still yourself. Yeah, that's often the goal. And it's worth",
+spanish: "integrado pero aún siendo tú mismo. Sí, ese suele ser el objetivo. Y vale la pena"
+},
+            {
+startTime: "00:09:49,264",
+endTime: "00:09:54,911",
+english: "mentioning Svere Lisegaard's research building on Oberg. His U-model, based on",
+spanish: "mencionar la investigación de Svere Lisegaard basada en Oberg. Su modelo U, basado en"
+},
+            {
+startTime: "00:09:55,331",
+endTime: "00:10:00,056",
+english: "studying Norwegian students abroad, really visualized that dip in well-being",
+spanish: "estudiar estudiantes noruegos en el extranjero, realmente visualizó esa caída en el bienestar"
+},
+            {
+startTime: "00:10:00,377",
+endTime: "00:10:04,421",
+english: "and then the gradual recovery over time. Right, the visual U-shape. And you also",
+spanish: "y luego la recuperación gradual con el tiempo. Correcto, la forma visual de U. Y también"
+},
+            {
+startTime: "00:10:04,461",
+endTime: "00:10:08,926",
+english: "mentioned a W-model earlier. What's that about? Ah, yes. The W-model basically",
+spanish: "mencionaste un modelo W antes. ¿De qué se trata? Ah, sí. El modelo W básicamente"
+},
+            {
+startTime: "00:10:08,966",
+endTime: " 00:10:12,79",
+english: "takes the U-curve and adds another dip in recovery. It accounts for what happens",
+spanish: "toma la curva U y añade otra caída en la recuperación. Representa lo que ocurre"
+},
+            {
+startTime: "00:10:12,81 ",
+endTime: "00:10:17,044",
+english: "when you go back home. Go back home? Why would there be another dip? It's called",
+spanish: "cuando regresas a casa. ¿Regresar a casa? ¿Por qué habría otra caída? Se llama"
+},
+            {
+startTime: "00:10:17,084",
+endTime: "00:10:22,542",
+english: "reverse culture shock or sometimes re-entry shock. You've adapted so much to",
+spanish: "choque cultural inverso o a veces shock de reingreso. Te has adaptado tanto a"
+},
+            {
+startTime: "00:10:22,582",
+endTime: "00:10:26,997",
+english: "the English-speaking culture that returning to your own culture can feel",
+spanish: "la cultura de habla inglesa que volver a tu propia cultura puede sentirse"
+},
+            {
+startTime: "00:10:27,137",
+endTime: "00:10:31,299",
+english: "jarring. So you feel like a stranger in your own home? It can happen. You might",
+spanish: "discordante. ¿Así que te sientes como un extraño en tu propio hogar? Puede pasar. Podrías"
+},
+            {
+startTime: "00:10:31,319",
+endTime: "00:10:34,763",
+english: "have changed. Your perspectives might be different. And your home culture might",
+spanish: "haber cambiado. Tus perspectivas pueden ser diferentes. Y tu cultura de origen puede"
+},
+            {
+startTime: "00:10:34,783",
+endTime: " 00:10:39,37",
+english: "have changed while you were gone, too. So readjusting back can sometimes feel like",
+spanish: "haber cambiado mientras estabas fuera también. Así que reajustarse puede a veces sentirse como"
+},
+            {
+startTime: "00:10:39,41 ",
+endTime: "00:10:42,594",
+english: "going through the shock process all over again. That's fascinating, something to",
+spanish: "pasar por el proceso de choque otra vez. Eso es fascinante, algo que"
+},
+            {
+startTime: "00:10:42,634",
+endTime: " 00:10:46,48",
+english: "definitely keep in mind for the future, even if the immediate focus is arriving.",
+spanish: "definitivamente hay que tener en cuenta para el futuro, incluso si el enfoque inmediato es la llegada."
+},
+            {
+startTime: "00:10:46,62 ",
+endTime: "00:10:50,886",
+english: "Exactly. Adjustment is often an ongoing thing. OK, so knowing about these stages",
+spanish: "Exactamente. El ajuste suele ser algo continuo. OK, entonces conocer estas etapas"
+},
+            {
+startTime: "00:10:50,926",
+endTime: "00:10:54,811",
+english: "is helpful. But for you listening, getting ready to jump into this English",
+spanish: "es útil. Pero para ti que estás escuchando, preparándote para sumergirte en este entorno"
+},
+            {
+startTime: "00:10:54,871",
+endTime: "00:10:59,559",
+english: "immersion, What are some real practical things you can do to cope, to make the",
+spanish: "de inglés, ¿qué cosas prácticas reales puedes hacer para sobrellevarlo, para hacer que la"
+},
+            {
+startTime: "00:10:59,619",
+endTime: "00:11:04,848",
+english: "transition, you know, a bit easier? Great question. Let's talk coping strategies.",
+spanish: "transición, ya sabes, sea un poco más fácil? Buena pregunta. Hablemos de estrategias de afrontamiento."
+},
+            {
+startTime: "00:11:05,208",
+endTime: "00:11:08,514",
+english: "One of the absolute best things. Ask questions. What kind of questions? Like,",
+spanish: "Una de las mejores cosas. Haz preguntas. ¿Qué tipo de preguntas? Como,"
+},
+            {
+startTime: "00:11:08,534",
+endTime: "00:11:12,701",
+english: "where's the bus stop? Well, yes, the practical stuff, too. But also, ask",
+spanish: "¿dónde está la parada del bus? Bueno, sí, las cosas prácticas también. Pero también pregunta"
+},
+            {
+startTime: "00:11:12,741",
+endTime: "00:11:16,247",
+english: "people why they do things a certain way. Ask their opinions. Ask about customs.",
+spanish: "a la gente por qué hacen las cosas de cierta manera. Pide sus opiniones. Pregunta sobre costumbres."
+},
+            {
+startTime: "00:11:17,429",
+endTime: "00:11:21,654",
+english: "Try to get beyond surface-level observations. So be curious and try to",
+spanish: "Intenta ir más allá de observaciones superficiales. Así que sé curioso e intenta"
+},
+            {
+startTime: "00:11:21,734",
+endTime: "00:11:26,619",
+english: "understand the deeper cultural logic. Break down stereotypes. Precisely. It",
+spanish: "entender la lógica cultural más profunda. Rompe estereotipos. Precisamente."
+},
+            {
+startTime: "00:11:26,699",
+endTime: "00:11:30,644",
+english: "fosters connection and real understanding. And number two, which is",
+spanish: "Fomenta la conexión y el entendimiento real. Y número dos, que es"
+},
+            {
+startTime: "00:11:30,804",
+endTime: "00:11:35,569",
+english: "huge for you, learn and practice the language. Beyond the classroom.",
+spanish: "enorme para ti, aprende y practica el idioma. Más allá del aula."
+},
+            {
+startTime: "00:11:35,769",
+endTime: "00:11:40,314",
+english: "Absolutely. Immerse yourself. Watch local TV, listen to English radio or",
+spanish: "Absolutamente. Sumérgete. Mira televisión local, escucha radio o podcasts en inglés,"
+},
+            {
+startTime: "00:11:40,394",
+endTime: " 00:11:45,46",
+english: "podcasts, read local papers or websites, but most importantly, talk to people.",
+spanish: "lee periódicos o sitios web locales, pero lo más importante, habla con gente."
+},
+            {
+startTime: "00:11:45,507",
+endTime: "00:11:49,571",
+english: "Even if it feels scary or you make mistakes. Especially then, push through",
+spanish: "Incluso si da miedo o cometes errores. Especialmente entonces, supera"
+},
+            {
+startTime: "00:11:49,591",
+endTime: "00:11:54,756",
+english: "that fear. Try using the local slang you hear. Figure out the accents. Real world",
+spanish: "ese miedo. Intenta usar la jerga local que escuches. Descifra los acentos. La práctica en el"
+},
+            {
+startTime: "00:11:54,816",
+endTime: "00:11:58,099",
+english: "practice is key. OK, dive into the language. Don't just study it. What else?",
+spanish: "mundo real es clave. OK, sumérgete en el idioma. No solo lo estudies. ¿Qué más?"
+},
+            {
+startTime: "00:11:58,119",
+endTime: "00:12:01,562",
+english: "Observe. Pay attention to social rituals. How do people greet each other?",
+spanish: "Observa. Presta atención a los rituales sociales. ¿Cómo se saludan las personas?"
+},
+            {
+startTime: "00:12:01,622",
+endTime: "00:12:05,566",
+english: "Introduce themselves. Say goodbye. How does it change with age or status? Like",
+spanish: "Se presentan. Se despiden. ¿Cómo cambia con la edad o estatus? Como"
+},
+            {
+startTime: "00:12:05,626",
+endTime: " 00:12:09,99",
+english: "becoming a bit of a social detective. Kind of. Notice the nonverbal stuff too. These",
+spanish: "convertirte en un detective social. Algo así. Fíjate también en lo no verbal. Estos"
+},
+            {
+startTime: "00:12:10,05 ",
+endTime: "00:12:13,794",
+english: "little details tell you a lot about unspoken rules and expectations. Tuning",
+spanish: "pequeños detalles te dicen mucho sobre reglas no escritas y expectativas. Sintonizar"
+},
+            {
+startTime: "00:12:13,834",
+endTime: "00:12:18,584",
+english: "into the cultural frequency. Yeah. Good way to put it. Also take what we could call",
+spanish: "con la frecuencia cultural. Sí. Buena forma de decirlo. También haz lo que podríamos llamar"
+},
+            {
+startTime: "00:12:18,845",
+endTime: "00:12:23,712",
+english: "field trips. Field trips. Yeah. Deliberately go and observe everyday",
+spanish: "excursiones culturales. Excursiones culturales. Sí. Ve deliberadamente a observar la vida"
+},
+            {
+startTime: "00:12:23,792",
+endTime: " 00:12:29,26",
+english: "life in different places. Homes if you get invited, shops, markets, public",
+spanish: "cotidiana en diferentes lugares. Hogares si te invitan, tiendas, mercados, transporte"
+},
+            {
+startTime: "00:12:29,32 ",
+endTime: "00:12:33,526",
+english: "transport, community events, maybe religious services if appropriate. See",
+spanish: "público, eventos comunitarios, quizás servicios religiosos si es apropiado. Observa"
+},
+            {
+startTime: "00:12:33,566",
+endTime: "00:12:39,541",
+english: "how people act. So actively get out and see the culture in action, not just stay in",
+spanish: "cómo actúa la gente. Así que sal activamente y ve la cultura en acción, no solo te quedes en"
+},
+            {
+startTime: "00:12:39,561",
+endTime: "00:12:44,053",
+english: "your student bubble or expat community. Exactly. And connect with others who've",
+spanish: "tu burbuja estudiantil o comunidad de expatriados. Exactamente. Y conéctate con otros que han"
+},
+            {
+startTime: "00:12:44,093",
+endTime: "00:12:47,871",
+english: "been through it. Other international students. Yes, or expats. Especially",
+spanish: "pasado por eso. Otros estudiantes internacionales. Sí, o expatriados. Especialmente"
+},
+            {
+startTime: "00:12:47,931",
+endTime: "00:12:51,274",
+english: "people from different backgrounds than your own. Hearing their stories, their",
+spanish: "personas de diferentes orígenes al tuyo. Escuchar sus historias, sus"
+},
+            {
+startTime: "00:12:51,354",
+endTime: "00:12:55,078",
+english: "tips, what worked for them, that can be incredibly helpful and supportive.",
+spanish: "consejos, lo que les funcionó, eso puede ser increíblemente útil y reconfortante."
+},
+            {
+startTime: "00:12:55,098",
+endTime: "00:12:58,782",
+english: "Build that network. Shared experience. Makes sense. And maybe keep a journal.",
+spanish: "Construye esa red. Experiencia compartida. Tiene sentido. Y quizás lleva un diario."
+},
+            {
+startTime: "00:12:58,922",
+endTime: "00:13:02,606",
+english: "Writing things down, how does that help? It helps you process things, note down",
+spanish: "Escribir cosas, ¿cómo ayuda? Te ayuda a procesar cosas, anotar"
+},
+            {
+startTime: "00:13:02,626",
+endTime: "00:13:06,129",
+english: "your observations, how you felt, what confused you, what you enjoyed. It lets",
+spanish: "tus observaciones, cómo te sentiste, qué te confundió, qué disfrutaste. Te permite"
+},
+            {
+startTime: "00:13:06,169",
+endTime: "00:13:09,192",
+english: "you track your own adjustment and reflect. It's quite insightful,",
+spanish: "hacer seguimiento de tu propio ajuste y reflexionar. Es bastante revelador,"
+},
+            {
+startTime: "00:13:09,272",
+endTime: " 00:13:14,41",
+english: "actually. Like a personal debrief. I like that. Any more tips? Read about the host",
+spanish: "de hecho. Como un informe personal. Me gusta eso. ¿Algún otro consejo? Lee sobre la cultura"
+},
+            {
+startTime: "00:13:14,47 ",
+endTime: "00:13:18,976",
+english: "culture. Not just news, but maybe history, novels set there, guides.",
+spanish: "anfitriona. No solo noticias, sino quizás historia, novelas ambientadas allí, guías."
+},
+            {
+startTime: "00:13:19,617",
+endTime: "00:13:23,742",
+english: "Understand the context. And try seeing yourself as a teacher, too. A teacher of my",
+spanish: "Entiende el contexto. Y también intenta verte como un profesor. Un profesor de tu"
+},
+            {
+startTime: "00:13:23,762",
+endTime: "00:13:27,547",
+english: "own culture. Yeah. People might ask you questions about your home country. Be",
+spanish: "propia cultura. Sí. La gente podría hacerte preguntas sobre tu país de origen. Sé"
+},
+            {
+startTime: "00:13:27,607",
+endTime: "00:13:32,113",
+english: "patient. Explain things. It fosters mutual understanding and can reframe",
+spanish: "paciente. Explica las cosas. Fomenta el entendimiento mutuo y puede reformular"
+},
+            {
+startTime: "00:13:32,173",
+endTime: "00:13:36,198",
+english: "interactions positively. That's a nice perspective shift. Not just learning,",
+spanish: "las interacciones positivamente. Ese es un buen cambio de perspectiva. No solo aprender,"
+},
+            {
+startTime: "00:13:36,258",
+endTime: "00:13:41,745",
+english: "but sharing, too. And finally, maybe the most important, reflect purposefully.",
+spanish: "sino también compartir. Y finalmente, quizás lo más importante, reflexiona con propósito."
+},
+            {
+startTime: "00:13:42,113",
+endTime: "00:13:46,757",
+english: "Regularly check in with yourself. How are your expectations matching reality?",
+spanish: "Revisa regularmente contigo mismo. ¿Cómo coinciden tus expectativas con la realidad?"
+},
+            {
+startTime: "00:13:46,979",
+endTime: "00:13:50,789",
+english: "What's challenging? How can you make this experience constructive? So being",
+spanish: "¿Qué es desafiante? ¿Cómo puedes hacer esta experiencia constructiva? Así que sé"
+},
+            {
+startTime: "00:13:50,889",
+endTime: "00:13:54,915",
+english: "mindful and actively shaping your response to the experience. Exactly.",
+spanish: "consciente y moldea activamente tu respuesta a la experiencia. Exactamente."
+},
+            {
+startTime: "00:13:54,975",
+endTime: "00:13:58,500",
+english: "It's about engaging with the process, not just letting it happen to you. These are",
+spanish: "Se trata de involucrarte en el proceso, no solo dejar que te suceda. Estos son"
+},
+            {
+startTime: "00:13:58,52 ",
+endTime: "00:14:02,526",
+english: "really great actionable tips. And you mentioned reentry briefly, those tips",
+spanish: "consejos realmente prácticos y accionables. Y mencionaste brevemente el reingreso, esos consejos"
+},
+            {
+startTime: "00:14:02,586",
+endTime: "00:14:06,351",
+english: "about connecting with returnees and giving yourself time. Apply then too,",
+spanish: "sobre conectar con quienes han regresado y darte tiempo. Aplícalos también entonces,"
+},
+            {
+startTime: "00:14:06,451",
+endTime: "00:14:10,036",
+english: "right? Absolutely. That W curve is real for many people. Be patient with yourself",
+spanish: "¿verdad? Absolutamente. Esa curva W es real para muchas personas. Sé paciente contigo mismo"
+},
+            {
+startTime: "00:14:10,057",
+endTime: "00:14:13,502",
+english: "during that phase too. Okay. Before we wrap up, are there any other ways",
+spanish: "durante esa fase también. OK. Antes de terminar, ¿hay otras formas en que"
+},
+            {
+startTime: "00:14:13,562",
+endTime: " 00:14:17,83",
+english: "researchers think about culture shock? Different angles. Yeah, a couple worth a",
+spanish: "los investigadores piensan sobre el choque cultural? Diferentes ángulos. Sí, un par que vale la pena"
+},
+            {
+startTime: "00:14:17,87 ",
+endTime: "00:14:22,457",
+english: "quick mention. Gary Weaver talked about three basic causes, losing your familiar",
+spanish: "mencionar rápidamente. Gary Weaver habló de tres causas básicas: perder tus señales"
+},
+            {
+startTime: "00:14:22,537",
+endTime: "00:14:27,464",
+english: "cues for how to behave, communication breaking down, and that identity crisis",
+spanish: "familiares de comportamiento, fallas en comunicación y esa crisis de identidad"
+},
+            {
+startTime: "00:14:27,504",
+endTime: " 00:14:31,61",
+english: "we touched on. Loss of cues, communication, identity. Got it. Peter",
+spanish: "que mencionamos. Pérdida de señales, comunicación, identidad. Entiendo. Peter"
+},
+            {
+startTime: "00:14:31,67 ",
+endTime: "00:14:36,498",
+english: "Adler focused more on the psychological side of things, and Tim Milstein actually",
+spanish: "Adler se enfocó más en el aspecto psicológico, y Tim Milstein en realidad"
+},
+            {
+startTime: "00:14:36,538",
+endTime: "00:14:40,524",
+english: "suggested culture shock can have positive effects too, maybe forcing",
+spanish: "sugirió que el choque cultural también puede tener efectos positivos, quizás forzando"
+},
+            {
+startTime: "00:14:40,604",
+endTime: "00:14:44,518",
+english: "growth, though our sources didn't go deep on that. Interesting. And what about from",
+spanish: "crecimiento, aunque nuestras fuentes no profundizaron en eso. Interesante. ¿Y qué hay desde"
+},
+            {
+startTime: "00:14:44,578",
+endTime: "00:14:48,783",
+english: "a health perspective? Is it recognized medically at all? It is in a way. The",
+spanish: "una perspectiva de salud? ¿Se reconoce médicamente? En cierto modo. El"
+},
+            {
+startTime: "00:14:48,903",
+endTime: "00:14:54,148",
+english: "ICD-10, which classifies diseases, lists culture shock as something that can",
+spanish: "ICD-10, que clasifica enfermedades, enumera el choque cultural como algo que puede"
+},
+            {
+startTime: "00:14:54,168",
+endTime: "00:14:58,413",
+english: "trigger adjustment disorders. It talks about difficulties with cultural",
+spanish: "desencadenar trastornos de adaptación. Habla sobre dificultades con el ajuste"
+},
+            {
+startTime: "00:14:58,453",
+endTime: "00:15:02,978",
+english: "adjustment. So it acknowledges that this process can be a significant stressor on",
+spanish: "cultural. Así que reconoce que este proceso puede ser un factor estresante significativo para"
+},
+            {
+startTime: "00:15:03,038",
+endTime: "00:15:06,081",
+english: "mental health. Exactly. It highlights that people are more vulnerable during",
+spanish: "la salud mental. Exactamente. Destaca que las personas son más vulnerables durante"
+},
+            {
+startTime: "00:15:06,141",
+endTime: "00:15:09,265",
+english: "these big adjustments. It's sometimes linked with things like depression or",
+spanish: "estos grandes ajustes. A veces se vincula con cosas como depresión o"
+},
+            {
+startTime: "00:15:09,305",
+endTime: " 00:15:13,68",
+english: "psychosomatic issues during migration. That's really important to be aware of.",
+spanish: "problemas psicosomáticos durante la migración. Eso es realmente importante tener en cuenta."
+},
+            {
+startTime: "00:15:13,72 ",
+endTime: "00:15:17,866",
+english: "This isn't just feeling a bit awkward. It can have real impacts, especially",
+spanish: "Esto no es solo sentirse un poco incómodo. Puede tener impactos reales, especialmente"
+},
+            {
+startTime: "00:15:17,906",
+endTime: "00:15:23,373",
+english: "layered with language stress. For sure. But the main thing to remember, and all our",
+spanish: "combinado con el estrés del idioma. Sin duda. Pero lo principal que hay que recordar, y todas nuestras"
+},
+            {
+startTime: "00:15:23,413",
+endTime: " 00:15:28,26",
+english: "sources really stress this, is that adapting is natural. It's individual.",
+spanish: "fuentes enfatizan esto, es que adaptarse es natural. Es individual."
+},
+            {
+startTime: "00:15:28,76 ",
+endTime: "00:15:32,165",
+english: "Having difficulties doesn't mean you're weak or doing something wrong. It's just",
+spanish: "Tener dificultades no significa que seas débil o que estés haciendo algo mal. Es solo"
+},
+            {
+startTime: "00:15:32,205",
+endTime: "00:15:35,069",
+english: "part of the process of adapting to something very new and different.",
+spanish: "parte del proceso de adaptarse a algo muy nuevo y diferente."
+},
+            {
+startTime: "00:15:35,369",
+endTime: "00:15:40,494",
+english: "Absolutely. OK, so wrapping up this deep dive then. If you're heading into an",
+spanish: "Absolutamente. OK, entonces para concluir este deep dive. Si te estás embarcando en una"
+},
+            {
+startTime: "00:15:40,594",
+endTime: " 00:15:45,58",
+english: "English immersion experience, expect some culture shock. It's normal. It",
+spanish: "experiencia de inmersión en inglés, espera cierto choque cultural. Es normal. Le"
+},
+            {
+startTime: "00:15:45,64 ",
+endTime: "00:15:49,324",
+english: "happens to almost everyone. Yeah, it's definitely not a reflection on you or your",
+spanish: "pasa a casi todos. Sí, definitivamente no es un reflejo de ti o de tus"
+},
+            {
+startTime: "00:15:49,384",
+endTime: "00:15:53,889",
+english: "abilities. It's just adjustment. And knowing the potential stages, that",
+spanish: "habilidades. Es solo ajuste. Y conocer las posibles etapas, esa"
+},
+            {
+startTime: "00:15:53,909",
+endTime: "00:15:59,014",
+english: "honeymoon, the tougher negotiations, the adjustment, and finally adaptation",
+spanish: "luna de miel, las negociaciones más difíciles, el ajuste y finalmente la adaptación"
+},
+            {
+startTime: "00:15:59,094",
+endTime: "00:16:02,919",
+english: "can help you understand what you might be feeling. Right. And having these coping",
+spanish: "puede ayudarte a entender lo que podrías estar sintiendo. Correcto. Y tener estas estrategias de"
+},
+            {
+startTime: "00:16:02,959",
+endTime: "00:16:05,882",
+english: "strategies we talked about, asking questions, practicing English",
+spanish: "afrontamiento de las que hablamos, hacer preguntas, practicar inglés"
+},
+            {
+startTime: "00:16:05,922",
+endTime: "00:16:09,147",
+english: "everywhere, observing, connecting, reflecting can make a huge difference. It",
+spanish: "en todas partes, observar, conectar, reflexionar puede marcar una gran diferencia."
+},
+            {
+startTime: "00:16:09,187",
+endTime: "00:16:12,291",
+english: "sounds like being aware, being proactive, and just being patient with",
+spanish: "Suena como que ser consciente, ser proactivo y simplemente ser paciente contigo"
+},
+            {
+startTime: "00:16:12,331",
+endTime: "00:16:16,816",
+english: "yourself are key to navigating it successfully. Definitely. That way you",
+spanish: "mismo son clave para navegarlo exitosamente. Definitivamente. Así podrás"
+},
+            {
+startTime: "00:16:16,836",
+endTime: "00:16:20,700",
+english: "can get through the bumps and really focus on the amazing parts, the learning, the",
+spanish: "superar los baches y enfocarte realmente en las partes maravillosas, el aprendizaje, las"
+},
+            {
+startTime: "00:16:20,76 ",
+endTime: "00:16:25,445",
+english: "new connections, the cultural exchange. Absolutely. So here's a final thought to",
+spanish: "nuevas conexiones, el intercambio cultural. Absolutamente. Así que aquí hay un último pensamiento para"
+},
+            {
+startTime: "00:16:25,485",
+endTime: " 00:16:29,93",
+english: "leave you with as you prepare. Flip the script for a moment. What things about",
+spanish: "dejarte mientras te preparas. Cambia la perspectiva por un momento. ¿Qué cosas de"
+},
+            {
+startTime: "00:16:29,97 ",
+endTime: "00:16:33,835",
+english: "your culture, your everyday life back home, do you think might seem surprising",
+spanish: "tu cultura, tu vida cotidiana en casa, crees que podrían parecer sorprendentes"
+},
+            {
+startTime: "00:16:33,895",
+endTime: "00:16:37,719",
+english: "or confusing or strange to someone visiting from the English-speaking",
+spanish: "o confusas o extrañas para alguien que visite desde el país de habla inglesa"
+},
+            {
+startTime: "00:16:37,759",
+endTime: "00:16:41,546",
+english: "country you're going to? Hmm. Yeah. Thinking about your own culture through",
+spanish: "al que vas? Mmm. Sí. Pensar en tu propia cultura a través de"
+},
+            {
+startTime: "00:16:41,586",
+endTime: "00:16:44,764",
+english: "an outsider's eyes. Wow. That can be a really interesting exercise in",
+spanish: "los ojos de un forastero. Guau. Eso puede ser un ejercicio realmente interesante de"
+},
+            {
+startTime: "00:16:44,804",
+endTime: "00:16:48,142",
+english: "perspective before you even leave. Might spark some good conversations later,",
+spanish: "perspectiva antes de que te vayas. Podría generar buenas conversaciones más adelante,"
+},
+            {
+startTime: "00:16:48,162",
+endTime: "00:16:48,484",
+english: "too.",
+spanish: "también."
+}
+        ];
+
+        // Convert SRT time format to seconds
+        function srtTimeToSeconds(timeStr) {
+            const [hms, ms] = timeStr.split(',');
+            const [hours, minutes, seconds] = hms.split(':');
+            return parseFloat(hours) * 3600 + parseFloat(minutes) * 60 + parseFloat(seconds) + parseFloat(ms) / 1000;
+        }
+
+        // Format seconds to HH:MM:SS
+        function formatTime(seconds) {
+            const date = new Date(0);
+            date.setSeconds(seconds);
+            return date.toISOString().substr(11, 8);
+        }
+
+        // Highlight words in the English caption
+// Modified highlightWords function
+function highlightWords(currentCaption, currentTime) {
+    const captionStart = srtTimeToSeconds(currentCaption.startTime);
+    const captionEnd = srtTimeToSeconds(currentCaption.endTime);
+    const totalDuration = captionEnd - captionStart;
+    const words = currentCaption.english.split(/\s+/);
+    
+    // Calculate weights for each word (base weight + length factor)
+    const wordWeights = words.map(word => {
+        // Base weight + length factor + complexity factor (for words with apostrophes/hyphens)
+        const cleanWord = word.replace(/[.,!?]/g, '');
+        let weight = 1 + (cleanWord.length * 0.2);
+        if (cleanWord.includes("'") || cleanWord.includes("-")) weight *= 1.3;
+        return weight;
+    });
+    
+    const totalWeight = wordWeights.reduce((sum, weight) => sum + weight, 0);
+    let accumulatedTime = 0;
+    let highlightedText = '';
+    
+    // ... existing code ...
+    
+    for (let i = 0; i < words.length; i++) {
+        const wordDuration = (wordWeights[i] / totalWeight) * totalDuration;
+        const wordStart = captionStart + accumulatedTime;
+        const wordEnd = wordStart + wordDuration;
+        
+        const cleanWord = words[i].replace(/[.,!?]/g, '');
+        const highlightClass = (currentTime >= wordStart && currentTime < wordEnd) ? 'highlight' : '';
+        const clickableClass = !isPlaying ? 'word-clickable' : '';
+        
+        highlightedText += `<span class="${highlightClass} ${clickableClass}">${words[i]}</span> `;
+        
+        accumulatedTime += wordDuration;
+    }
+    
+    return highlightedText;
+}
+
+// Modified updateCaptions function
+function updateCaptions(currentTime) {
+    let activeCaption = null;
+    
+    for (const caption of captions) {
+        const startTime = srtTimeToSeconds(caption.startTime);
+        const endTime = srtTimeToSeconds(caption.endTime);
+        
+        if (currentTime >= startTime && currentTime < endTime) {
+            activeCaption = caption;
+            break;
+        }
+    }
+    
+    if (activeCaption) {
+        const highlightedEnglish = highlightWords(activeCaption, currentTime);
+        englishDiv.innerHTML = highlightedEnglish;
+        spanishDiv.textContent = activeCaption.spanish;
+        englishDiv.classList.remove('hidden');
+        spanishDiv.classList.remove('hidden');
+        updateClickableState(); // Add this line
+    } else {
+        englishDiv.classList.add('hidden');
+        spanishDiv.classList.add('hidden');
+    }
+}
+
+        // Update timeline and captions
+        function updatePlayer() {
+            if (!isPlaying) return;
+            
+            const currentTime = audioPlayer.currentTime;
+            const duration = audioPlayer.duration || 1;
+            
+            // Update progress bar
+            const progressPercent = (currentTime / duration) * 100;
+            progress.style.width = `${progressPercent}%`;
+            
+            // Update time display
+            currentTimeDisplay.textContent = formatTime(currentTime);
+            durationDisplay.textContent = formatTime(duration);
+            
+            // Update captions
+            updateCaptions(currentTime);
+            
+            animationId = requestAnimationFrame(updatePlayer);
+        }
+
+        // Play audio
+        function playAudio() {
+            audioPlayer.play();
+            isPlaying = true;
+            playButton.disabled = true;
+            pauseButton.disabled = false;
+	    updateClickableState(); // Add this line
+            updatePlayer();
+        }
+
+        // Pause audio
+        function pauseAudio() {
+            audioPlayer.pause();
+            isPlaying = false;
+            playButton.disabled = false;
+            pauseButton.disabled = true;
+    		updateClickableState(); // Add this line
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+        }
+
+        // Restart audio
+        function restartAudio() {
+            audioPlayer.currentTime = 0;
+            if (!isPlaying) {
+                playAudio();
+            } else {
+                updateCaptions(0);
+                updatePlayer();
+            }
+        }
+
+        // Skip backward 10 seconds
+        function skipBackward() {
+            audioPlayer.currentTime = Math.max(0, audioPlayer.currentTime - 10);
+            updateCaptions(audioPlayer.currentTime);
+        }
+
+        // Skip forward 10 seconds
+        function skipForward() {
+            audioPlayer.currentTime = Math.min(audioPlayer.duration, audioPlayer.currentTime + 10);
+            updateCaptions(audioPlayer.currentTime);
+        }
+
+        // Change playback speed
+        function changeSpeed() {
+            audioPlayer.playbackRate = parseFloat(speedSelect.value);
+        }
+
+        // Seek to position in timeline
+        function seekToPosition(e) {
+            if (!audioPlayer.duration) return;
+            
+            const timelineWidth = timeline.offsetWidth;
+            const clickPosition = e.offsetX;
+            const seekPercent = clickPosition / timelineWidth;
+            const seekTime = seekPercent * audioPlayer.duration;
+            
+            audioPlayer.currentTime = seekTime;
+            updateCaptions(seekTime);
+            
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            updatePlayer();
+        }
+
+        // Initialize audio player with the specified file
+        function initAudioPlayer() {
+            const audioUrl = "https://camachome.github.io/expresslls/Understanding%20and%20Coping%20with%20Culture%20Shock.mp3";
+            audioPlayer.src = audioUrl;
+            
+            // Enable controls
+            playButton.disabled = false;
+            pauseButton.disabled = true;
+            restartButton.disabled = false;
+            
+            // When metadata is loaded, update duration
+            audioPlayer.onloadedmetadata = function() {
+                durationDisplay.textContent = formatTime(audioPlayer.duration);
+            };
+    		setupWordPronunciation();
+        }
+
+function updateClickableState() {
+    const words = englishDiv.querySelectorAll('span');
+    words.forEach(word => {
+        if (!isPlaying) {
+            word.classList.add('word-clickable');
+        } else {
+            word.classList.remove('word-clickable');
+            word.classList.remove('active-pronunciation');
+        }
+    });
+}
+
+// Word click handler for pronunciation
+function setupWordPronunciation() {
+    englishDiv.addEventListener('click', (e) => {
+        if (!isPlaying && e.target.classList.contains('word-clickable')) {
+            const word = e.target.textContent.replace(/[.,!?]/g, '');
+            responsiveVoice.speak(word, "UK English Male", {
+                rate: 0.9,
+                pitch: 1,
+                onend: () => e.target.classList.remove('active-pronunciation')
+            });
+            e.target.classList.add('active-pronunciation');
+        }
+    });
+}
+
+        // Event listeners
+        playButton.addEventListener('click', playAudio);
+        pauseButton.addEventListener('click', pauseAudio);
+        restartButton.addEventListener('click', restartAudio);
+        back10Button.addEventListener('click', skipBackward);
+        forward10Button.addEventListener('click', skipForward);
+        speedSelect.addEventListener('change', changeSpeed);
+        timeline.addEventListener('click', seekToPosition);
+
+        // State variables
+        let isPlaying = false;
+        let animationId = null;
+
+        // Initialize
+        initAudioPlayer();
+    </script>
+</body>
+</html>
