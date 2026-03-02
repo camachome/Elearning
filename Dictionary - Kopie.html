@@ -55,12 +55,14 @@
 </div>
 
 <script>
+
+
 async function getDefinition() {
     const term = document.getElementById('wordInput').value.trim();
     const box = document.getElementById('dictionary-box');
     const btn = document.getElementById('execBtn');
 
-    // Reemplaza con tu MISTRAL_API_KEY
+    // Configuración de API
     const API_KEY = "w8VGFPRhY6n9B6Ou41DNk7qSsF21jWw5";
 
     if (!term) return;
@@ -80,7 +82,7 @@ async function getDefinition() {
                 messages: [
                     {
                         role: "system", 
-                        content: "Eres un diccionario académico. Define la palabra de forma breve, técnica y formal, al estilo RAE. Incluye etimología si es posible."
+                        content: "Eres un diccionario académico. Define la palabra de forma breve y formal. Usa negritas (**) para resaltar términos importantes o sinónimos."
                     },
                     {role: "user", content: `Define: ${term}`}
                 ],
@@ -89,11 +91,18 @@ async function getDefinition() {
         });
 
         const data = await response.json();
-        const content = data.choices[0].message.content;
+        let content = data.choices[0].message.content;
+
+        // --- LÓGICA DE FORMATEO ---
+        // 1. Convertimos los saltos de línea en <br>
+        content = content.replace(/\n/g, '<br>');
+        
+        // 2. Convertimos **texto** en <b>texto</b> usando Regex
+        content = content.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 
         box.innerHTML = `
             <span class="term-title">${term.toUpperCase()}</span>
-            <div class="def-text">${content.replace(/\n/g, '<br>')}</div>
+            <div class="def-text">${content}</div>
         `;
 
     } catch (e) {
